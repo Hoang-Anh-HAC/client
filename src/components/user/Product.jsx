@@ -95,7 +95,7 @@ const Product = ({
         products.map((product) => (
           <div
             key={product._id}
-            className="flex flex-col h-[180px] min-[380px]:h-[250px] xs:h-[280px] sm:h-[300px] w-full border-[1px] hover:border-black rounded-md cursor-pointer overflow-hidden group"
+            className="flex flex-col h-[180px] min-[380px]:h-[250px] xs:h-[280px] sm:h-[300px] w-full max-w-[150px] min-[380px]:max-w-[180px] xs:max-w-[200px] sm:max-w-full border-[1px] hover:border-black rounded-md cursor-pointer overflow-hidden group"
             onClick={() => {
               navigate(`/product/${product.slug}`);
             }}

@@ -197,8 +197,8 @@ const Navbar = () => {
               <img
                 src={
                   windowWidth < 1280
-                    ? "../../public/logoPri.png"
-                    : "../../public/logoSec.png"
+                    ? "../../public/logopri.png"
+                    : "../../public/logosec.png"
                 }
                 alt="Logo"
                 className="w-[40px] sm:w-[40px] md:w-[35px] xl:w-[120px]"

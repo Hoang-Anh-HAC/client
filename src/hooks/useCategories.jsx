@@ -9,9 +9,8 @@ const useCategories = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(`category/`);
-        if (!response.ok) throw new Error("Failed to fetch categories");
-        const data = await response.json();
+        const response = await axios.get(`category`);
+        const data = await response.data;
         setCategoriesFetch(data);
       } catch (error) {
         setError(error);

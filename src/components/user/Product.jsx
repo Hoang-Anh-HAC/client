@@ -56,6 +56,8 @@ const Product = ({
 
         const response = await axios.get(`/product?${queryParams.toString()}`);
 
+        console.log(queryParams.toString());
+
         if (response.data?.products?.length === 0) {
           setError("Không có sản phẩm trong danh mục này.");
           setProducts([]);
@@ -124,7 +126,7 @@ const Product = ({
         products.map((product) => (
           <div
             key={product._id}
-            className="flex flex-col h-[220px] min-[380px]:h-[280px] xs:h-[300px] sm:h-[350px] w-full max-w-[180px] min-[380px]:max-w-[200px] xs:max-w-[220px] sm:max-w-full border-[1px] hover:border-grey border-white cursor-pointer overflow-hidden group"
+            className="border-[1px] border-gray-300 rounded-sm flex flex-col h-[220px] min-[380px]:h-[280px] xs:h-[300px] sm:h-[350px] w-full max-w-[180px] min-[380px]:max-w-[200px] xs:max-w-[220px] sm:max-w-full hover:border-grey  cursor-pointer overflow-hidden group"
             onClick={() => handleProductClick(product)}
           >
             <div className="flex items-center justify-center bg-gray-100 relative h-[130px] min-[380px]:h-[160px] xs:h-[180px] sm:h-[220px] w-full overflow-hidden min-[380px]:p-2 xs:p-3">
@@ -137,6 +139,9 @@ const Product = ({
             </div>
 
             <div className="flex flex-col justify-between h-[90px] min-[380px]:h-[120px] xs:h-[120px] p-2 min-[380px]:p-3 xs:p-4 relative">
+              <p className="text-[16px] min-[380px]:text-[14px] xs:text-base font-medium   line-clamp-2 text-red-600">
+                {product.productID}
+              </p>
               <p className="text-[16px] min-[380px]:text-[14px] xs:text-base font-normal line-clamp-2">
                 {product.title}
               </p>

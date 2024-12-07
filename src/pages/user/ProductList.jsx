@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Breadcrumb, Spin, Pagination, Segmented, Button, Tag } from "antd";
+import { useParams, Link } from "react-router-dom";
+import { Breadcrumb, Spin, Pagination, Button, Tag, Select } from "antd";
 import axios from "../../utils/axiosConfig";
 import Product from "../../components/user/Product";
 import ProductBrandFilter from "../../components/user/ProductBrandFilter";
@@ -12,6 +12,7 @@ function ProductList() {
   const { categorySlug, brandSlug } = useParams();
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(1);
@@ -23,12 +24,14 @@ function ProductList() {
   const [series, setSeries] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState(null);
 
-  const itemsPerPage = 25;
+  const itemsPerPage = 24;
 
   const [showMobileFilter, setShowMobileFilter] = useState(false);
 
   const [selectedTags, setSelectedTags] = useState([]);
   const [tempSelectedTags, setTempSelectedTags] = useState([]);
+
+  const [sortType, setSortType] = useState("default");
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -36,9 +39,11 @@ function ProductList() {
         setLoading(true);
         const response = await axios.get(`category/${categorySlug}`);
         setCategory(response.data);
+        setError(null);
         return response.data;
       } catch (error) {
         console.error("Error fetching category:", error);
+        setError(error);
       } finally {
         setLoading(false);
       }
@@ -52,6 +57,34 @@ function ProductList() {
     setOptions([]);
     setSelectedTags([]);
   }, [categorySlug]);
+
+  useEffect(() => {
+    // Reset brand và series khi category thay đổi
+    setSelectedBrand(null);
+    setSelectedSeries(null);
+    setBrand(null);
+    // Reset trang về 1
+    setCurrentPage(1);
+  }, [categorySlug]);
+
+  useEffect(() => {
+    const fetchBrand = async () => {
+      if (!brandSlug) return;
+
+      try {
+        setLoading(true);
+        const response = await axios.get(`brand/${brandSlug}`);
+        setSelectedBrand(response.data);
+        setBrand(response.data);
+      } catch (error) {
+        console.error("Error fetching brand:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBrand();
+  }, [brandSlug]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -96,6 +129,11 @@ function ProductList() {
     setShowMobileFilter(false);
   };
 
+  const handleSortChange = (value) => {
+    setSortType(value);
+    setCurrentPage(1);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -107,23 +145,52 @@ function ProductList() {
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalProducts);
 
-  const segmentedOptions = [
-    { label: "Thứ tự mặc định", value: "" },
-    { label: "Sản phẩm mới", value: "newProduct" },
-    { label: "Sản phẩm bán chạy", value: "mostPopular" },
-    { label: "Sản phẩm nổi bật", value: "featuredProduct" },
+  const sortOptions = [
+    { label: "Thứ tự mặc định", value: "default" },
+    { label: "Giá thấp đến cao", value: "price_asc" },
+    { label: "Giá cao đến thấp", value: "price_desc" },
+    { label: "Sản phẩm nổi bật", value: "featured" },
+  ];
+
+  const breadcrumbItems = [
+    {
+      title: <Link to="/">Trang Chủ</Link>,
+    },
+    {
+      title: category ? (
+        <Link
+          to={`/product-list/${category.slug}`}
+          onClick={() => {
+            setSelectedBrand(null);
+            setSelectedSeries(null);
+            setBrand(null);
+            setCurrentPage(1);
+            setOptions([]);
+            setSelectedTags([]);
+            setSortType("default");
+          }}
+          className={!brandSlug ? "font-bold text-black" : ""}
+        >
+          {category.title}
+        </Link>
+      ) : (
+        "Loading category..."
+      ),
+    },
+    ...(selectedBrand
+      ? [
+          {
+            title: selectedBrand.title,
+            className: "text-gray-500 font-semibold",
+          },
+        ]
+      : []),
   ];
 
   return (
     <div className="w-full bg-secondary grid justify-center items-center px-4 lg:px-8">
       <div className="flex w-full xl:w-[1200px] py-3">
-        <Breadcrumb
-          items={[
-            { title: <a href="/">Trang Chủ</a> },
-            { title: category ? category.title : "Loading category..." },
-            ...(selectedBrand ? [{ title: selectedBrand.title }] : []),
-          ]}
-        />
+        <Breadcrumb items={breadcrumbItems} />
       </div>
 
       <div className="lg:hidden mb-4">
@@ -261,24 +328,26 @@ function ProductList() {
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row justify-between text-sm mb-4">
-            <div className="flex flex-col gap-2 mb-4 sm:mb-0">
-              <div>Sắp xếp theo:</div>
-              <div className="overflow-x-auto">
-                <Segmented
-                  options={segmentedOptions}
-                  className="min-w-[300px] sm:min-w-0"
+          {totalProducts > 0 && !loading && !error && (
+            <div className="flex flex-col sm:flex-row justify-between text-sm mb-4">
+              <div className="flex gap-2 mb-4 sm:mb-0 items-center">
+                <div>Sắp xếp theo:</div>
+                <Select
+                  value={sortType}
+                  onChange={handleSortChange}
+                  options={sortOptions}
+                  className="w-[200px]"
                 />
               </div>
-            </div>
 
-            <div className="text-sm">
-              Hiển thị {startItem} - {endItem} trong tổng {totalProducts} kết
-              quả
+              <div className="text-sm">
+                Hiển thị {startItem} - {endItem} trong tổng {totalProducts} kết
+                quả
+              </div>
             </div>
-          </div>
+          )}
 
-          <div className="grid grid-cols-2 min-[380px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2 min-[380px]:gap-3 justify-items-center">
+          <div className="grid grid-cols-2 min-[380px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-2 min-[380px]:gap-3 justify-items-center">
             <Product
               category={category}
               brand={selectedBrand}
@@ -287,10 +356,11 @@ function ProductList() {
               limit={itemsPerPage}
               setTotalProducts={setTotalProducts}
               options={options}
+              sortType={sortType}
             />
           </div>
 
-          {totalProducts > itemsPerPage && (
+          {totalProducts > itemsPerPage && !loading && !error && (
             <Pagination
               align="center"
               current={currentPage}
@@ -298,6 +368,7 @@ function ProductList() {
               pageSize={itemsPerPage}
               onChange={handlePageChange}
               className="mt-4"
+              showSizeChanger={false}
             />
           )}
         </div>

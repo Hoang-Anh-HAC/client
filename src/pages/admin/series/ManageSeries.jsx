@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../../utils/axiosConfig";
-import { message, Input, Button, Select, Spin, List } from "antd";
+import { message, Input, Button, Select, Spin, List, Pagination } from "antd";
 
 const { Option } = Select;
 
@@ -17,6 +17,12 @@ function ManageSeries() {
   const [currentSeriesId, setCurrentSeriesId] = useState(null);
   const [loading, setLoading] = useState(false);
   const adminToken = localStorage.getItem("adminToken");
+  const [cachedData, setCachedData] = useState({});
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 5,
+    total: 0,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,12 +31,36 @@ function ManageSeries() {
     fetchData();
   }, []);
 
-  const fetchSeries = async () => {
+  const fetchSeries = async (page = 1, limit = 5) => {
+    const cacheKey = `${page}-${limit}`;
+    if (cachedData[cacheKey]) {
+      setSeries(cachedData[cacheKey].data);
+      setPagination({
+        current: cachedData[cacheKey].currentPage,
+        pageSize: limit,
+        total: cachedData[cacheKey].total,
+      });
+      return;
+    }
+
     try {
-      const { data } = await axios.get("/series", {
+      const response = await axios.get(`/series?page=${page}&limit=${limit}`, {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
+
+      const { data, total, currentPage } = response.data;
+
+      setCachedData((prev) => ({
+        ...prev,
+        [cacheKey]: response.data,
+      }));
+
       setSeries(data);
+      setPagination({
+        current: currentPage,
+        pageSize: limit,
+        total: total,
+      });
     } catch (error) {
       console.error("Error fetching series:", error);
       message.error("Failed to fetch series.");
@@ -119,6 +149,10 @@ function ManageSeries() {
     setEditedSeries({ title: "", brandID: "", categoryID: "" });
     setIsEditing(false);
     setCurrentSeriesId(null);
+  };
+
+  const handlePageChange = (page, pageSize) => {
+    fetchSeries(page, pageSize);
   };
 
   return (
@@ -228,6 +262,16 @@ function ManageSeries() {
               </List.Item>
             )}
           />
+          <div className="mt-4 flex justify-end">
+            <Pagination
+              current={pagination.current}
+              pageSize={pagination.pageSize}
+              total={pagination.total}
+              onChange={handlePageChange}
+              showSizeChanger
+              showTotal={(total) => `Tổng cộng ${total} series`}
+            />
+          </div>
         </Spin>
       </div>
     </div>

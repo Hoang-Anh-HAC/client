@@ -140,13 +140,11 @@ function ManageForm() {
     setIsModalVisible(true);
   };
 
-  const handleUpdateStatus = async (formId) => {
+  const handleUpdateStatus = async (formId, formType) => {
     try {
-      await axios.put(
-        `/prodform/${formId}`,
-        { status: "approved" },
-        axiosConfig
-      );
+      const endpoint =
+        formType === "support" ? `/formad/${formId}` : `/prodform/${formId}`;
+      await axios.put(endpoint, { status: "approved" }, axiosConfig);
       message.success("Cập nhật trạng thái thành công");
       fetchForms();
       setIsModalVisible(false);
@@ -223,7 +221,12 @@ function ManageForm() {
           <Button
             key="submit"
             type="primary"
-            onClick={() => handleUpdateStatus(selectedForm._id)}
+            onClick={() =>
+              handleUpdateStatus(
+                selectedForm._id,
+                selectedForm.prodID ? "product" : "support"
+              )
+            }
             disabled={selectedForm?.status === "processed"}
           >
             Đánh dấu đã xử lý

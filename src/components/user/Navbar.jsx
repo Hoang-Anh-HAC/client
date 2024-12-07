@@ -129,9 +129,12 @@ const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const [showSearchResult, setShowSearchResult] = useState(false);
+
+  const searchContainerRef = useRef(null);
 
   const { categoriesFetch, loading, error } = useCategories();
-
   const { categories, setCategories } = useData();
 
   useEffect(() => {
@@ -147,6 +150,23 @@ const Navbar = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target)
+      ) {
+        setShowSearchResult(false);
+        setSearchValue("");
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const toggleCategoryList = () => {
     setShowCategoryList(!showCategoryList);
   };
@@ -155,11 +175,11 @@ const Navbar = () => {
     setShowCategoryList(false);
   };
 
-  //Search
-  const [searchValue, setSearchValue] = useState("");
-  const [showSearchResult, setShowSearchResult] = useState(false);
+  const closeSearchResult = () => {
+    setShowSearchResult(false);
+    setSearchValue("");
+  };
 
-  //Loading
   if (loading) return <div>Loading categories...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
@@ -168,21 +188,18 @@ const Navbar = () => {
   };
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-30">
-      <div className="max-w-[1200px] w-full mx-auto px-2 sm:px-4">
-        <ul className="flex items-center justify-between pt-[5px] sm:pt-[10px]">
-          <li
-            className="flex items-center pr-2 sm:pl-4 cursor-pointer text-primary bg-white xl:hidden"
-            onClick={toggleMobileMenu}
-          >
-            <div>
+    <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
+      <div className="max-w-[1200px] mx-auto px-2 sm:px-4">
+        <ul className="flex items-center justify-between py-2 sm:py-3 gap-4 xl:gap-6">
+          <li className="xl:hidden">
+            <button onClick={() => setShowMobileMenu(true)} className="p-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
                 stroke="currentColor"
-                className="h-8 w-8 sm:h-10 sm:w-10"
+                className="w-6 h-6"
               >
                 <path
                   strokeLinecap="round"
@@ -190,24 +207,24 @@ const Navbar = () => {
                   d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
                 />
               </svg>
-            </div>
+            </button>
           </li>
-          <li className="pr-2 sm:pr-2">
+          <li className="shrink-0">
             <Link to="/">
               <img
                 src={
                   windowWidth < 1280
-                    ? "../../public/logopri.png"
-                    : "../../public/logosec.png"
+                    ? "/images/hac-logo/logo-pri.png"
+                    : "/images/hac-logo/logo-sec.png"
                 }
                 alt="Logo"
                 className="w-[40px] sm:w-[40px] md:w-[35px] xl:w-[120px]"
               />
             </Link>
           </li>
-          <div className="hidden xl:flex">
+          <div className="hidden xl:flex shrink-0">
             <li
-              className="flex items-center space-x-2 p-[10px] border-solid  border-[1px] rounded-md text-base cursor-pointer text-primary border-primary bg-white"
+              className="flex items-center space-x-2 h-[45px] md:h-[50px] px-3 border-solid border-[1px] rounded-md text-base cursor-pointer text-primary border-primary bg-white"
               onClick={toggleCategoryList}
             >
               <div>
@@ -226,19 +243,30 @@ const Navbar = () => {
                   />
                 </svg>
               </div>
-              <p className="font-medium ">Danh mục sản phẩm</p>
+              <p className="font-medium">Danh mục sản phẩm</p>
             </li>
           </div>
 
           {/* Desktop CategoryList */}
           {showCategoryList && (
-            <div className="absolute top-[146px] hidden xl:block">
+            <div className="absolute top-[160px] hidden xl:block">
               <div
-                className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-20 z-10"
+                className="fixed top-0 left-0 right-0 bottom-0 bg-black transition-opacity duration-300 ease-in-out"
+                style={{
+                  opacity: showCategoryList ? 0.2 : 0,
+                }}
                 onClick={closeCategoryList}
               ></div>
               <div className="relative z-20">
-                <CategoryList onClose={closeCategoryList} />
+                <div
+                  className={`transform transition-transform duration-300 ease-in-out ${
+                    showCategoryList
+                      ? "translate-y-0 opacity-100"
+                      : "-translate-y-4 opacity-0"
+                  }`}
+                >
+                  <CategoryList onClose={() => setShowCategoryList(false)} />
+                </div>
               </div>
             </div>
           )}
@@ -252,11 +280,11 @@ const Navbar = () => {
               items={items}
             />
           )}
-          <li className="relative flex-1 mx-2 sm:mx-4">
-            <div className="flex items-center border-solid border-[1px] rounded-md text-grey border-[#868686] bg-white h-[38px] md:h-[42px]">
+          <li className="relative flex-1" ref={searchContainerRef}>
+            <div className="flex items-center border-solid border-[1px] rounded-md text-grey border-[#868686] bg-white h-[45px] md:h-[50px]">
               <Input
                 placeholder="Tìm kiếm sản phẩm..."
-                className="w-full text-black border-none h-full"
+                className="w-full text-black border-none h-full rounded-md"
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 onFocus={() => setShowSearchResult(true)}
@@ -282,11 +310,14 @@ const Navbar = () => {
 
             {showSearchResult && searchValue && (
               <div className="absolute top-full left-0 w-full mt-1 ">
-                <SearchResult searchValue={searchValue} />
+                <SearchResult
+                  searchValue={searchValue}
+                  onClose={closeSearchResult}
+                />
               </div>
             )}
           </li>
-          <li className="text-primary items-center space-x-[10px] p-[15px] hidden md:flex">
+          <li className="text-primary items-center space-x-[10px] p-[15px] hidden md:flex shrink-0">
             <div>
               <svg
                 fill="currentColor"
@@ -318,11 +349,11 @@ const Navbar = () => {
             </div>
 
             <div className="font-normal text-sm lg:block hidden">
-              <p>Liên Hệ</p>
+              <Link to="/contact">Liên Hệ</Link>
               <p>028 399 70 399</p>
             </div>
           </li>
-          <li className="hidden md:flex text-primary items-center space-x-[10px] p-[15px]">
+          <li className="hidden md:flex text-primary items-center space-x-[10px] p-[15px] shrink-0">
             <a href={`mailto:${EMAIL}?subject=Hỏi thông tin&body=Chào bạn!`}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -346,10 +377,14 @@ const Navbar = () => {
           </li>
         </ul>
 
-        <ul className="items-center justify-center space-x-[15px] sm:space-x-[30px] py-2 sm:py-4 lg:text-sm text-xs text-primary bg-white flex">
-          <Link to="about">Giới Thiệu</Link>
+        <ul className="items-center justify-center space-x-[15px] sm:space-x-[30px] py-2 sm:py-3 lg:text-sm text-xs text-primary bg-white flex border-t border-gray-100">
+          <Link to="about" className="py-1">
+            Giới Thiệu
+          </Link>
           <div className="border-l border-grey h-6" />
-          <Link to="/">Liên Hệ</Link>
+          <Link to="/contact" className="py-1">
+            Liên Hệ
+          </Link>
         </ul>
 
         {/* Mobile Drawer with MobileCategoryList */}

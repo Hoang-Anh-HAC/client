@@ -1,11 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const BrandCategory = ({ category, onMouseLeave }) => {
+const BrandCategory = ({ category, onMouseLeave, onSelectBrand }) => {
   const navigate = useNavigate();
 
   const handleBrandClick = (brand) => {
-    navigate(`/product-list/${category.slug}/${brand.slug}`);
+    onSelectBrand?.(brand.slug);
   };
 
   return (

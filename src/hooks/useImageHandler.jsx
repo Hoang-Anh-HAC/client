@@ -18,7 +18,7 @@ export const useImageHandler = () => {
   const handleRemoveFromServer = async (publicId) => {
     try {
       setIsLoading(true);
-      await axios.delete(`/upload/${publicId}`, {
+      await axios.delete(`product/delete-img/${publicId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
         },
@@ -44,7 +44,7 @@ export const useImageHandler = () => {
         formData.append("images", file);
       });
 
-      const { data } = await axios.post("/upload", formData, {
+      const { data } = await axios.put("product/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${localStorage.getItem("adminToken")}`,

@@ -22,7 +22,7 @@ const footerItems = [
     ],
   },
   {
-    title: "CÔNG TY TNHH PHÁT TRIỂN CNTT HOÀNG ANH",
+    title: "THÔNG TIN LIÊN HỆ",
     items: [
       {
         text: "Địa chỉ: 74/28 Trương Quốc Dung, Phường 10, Quận Phú Nhuận, TP.HCM",
@@ -39,33 +39,79 @@ function FooterLayout() {
   return (
     <Footer className="mt-3 bg-white">
       <div className="max-w-[1200px] w-full mx-auto px-4">
-        <div className="max-w-[1200px] mx-auto border-b pb-4 sm:pb-8 mb-4 sm:mb-8">
-          <div className="text-center bg-gray-50 py-4 sm:py-8 rounded-lg">
-            <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 px-2">
-              YÊU CẦU BÁO GIÁ VÀ HỖ TRỢ KỸ THUẬT
-            </h2>
-            <Button
-              type="primary"
-              size="large"
-              className="bg-[#1e3a8a] hover:bg-[#1e4620] w-40 sm:w-48 h-10 sm:h-12 text-sm sm:text-base"
-            >
-              GỬI YÊU CẦU HỖ TRỢ
-            </Button>
-          </div>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Company Info Column */}
+          <div className="lg:col-span-1">
+            <div className="mb-4">
+              <img
+                src="/images/hac-logo/logo-sec.png"
+                alt="HAC Logo"
+                className="h-16 object-contain mb-2"
+              />
+              <h1 className="text-lg font-bold text-primary">
+                CÔNG TY TNHH PHÁT TRIỂN CNTT HOÀNG ANH
+              </h1>
+              <p className="text-sm text-gray-600 mb-4">
+                Mã số thuế: 0313519285
+              </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {/* Social Media Icons */}
+              <div className="flex gap-3 mb-4">
+                <a
+                  href="#"
+                  className="bg-gray-800 p-2 rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  <i className="fab fa-facebook-f text-white text-lg w-5 h-5 flex items-center justify-center"></i>
+                </a>
+                <a
+                  href="#"
+                  className="bg-gray-800 p-2 rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  <i className="fab fa-youtube text-white text-lg w-5 h-5 flex items-center justify-center"></i>
+                </a>
+                <a
+                  href="#"
+                  className="bg-gray-800 p-2 rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  <i className="fab fa-twitter text-white text-lg w-5 h-5 flex items-center justify-center"></i>
+                </a>
+                <a
+                  href="#"
+                  className="bg-gray-800 p-2 rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  <i className="fab fa-telegram text-white text-lg w-5 h-5 flex items-center justify-center"></i>
+                </a>
+                <a
+                  href="#"
+                  className="bg-gray-800 p-2 rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  <i className="fab fa-skype text-white text-lg w-5 h-5 flex items-center justify-center"></i>
+                </a>
+              </div>
+
+              {/* Certification Badges */}
+              <div className="flex gap-4">
+                <img
+                  src="/dathongbao.png"
+                  alt="Đã thông báo Bộ Công Thương"
+                  className="h-12 object-contain"
+                />
+                <img
+                  src="/dmca.png"
+                  alt="DMCA Protected"
+                  className="h-12 object-contain"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Rest of the footer content */}
           {footerItems.map((section, index) => (
-            <div
-              key={index}
-              className={`space-y-2 sm:space-y-3 ${
-                index === 2 ? "sm:col-span-2 lg:col-span-1" : ""
-              }`}
-            >
-              <label className="block uppercase font-bold text-sm sm:text-base mb-2 sm:mb-3">
+            <div key={index} className="space-y-3">
+              <label className="block uppercase font-bold text-sm sm:text-base">
                 {section.title}
               </label>
-              <div className="flex flex-col space-y-1 sm:space-y-2">
+              <div className="flex flex-col space-y-2">
                 {section.items.map((item, itemIndex) => (
                   <span
                     key={itemIndex}
@@ -82,6 +128,12 @@ function FooterLayout() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="mt-8 pt-4 border-t text-center">
+          <p className="text-sm text-gray-600">
+            © 2024 HAC. All rights reserved.
+          </p>
         </div>
       </div>
     </Footer>

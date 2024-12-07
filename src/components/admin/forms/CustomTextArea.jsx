@@ -18,7 +18,7 @@ function CustomTextArea({
     let formattedText = "";
     switch (tag) {
       case "title":
-        formattedText = `<div class="font-bold text-2xl">${selectedText}</div>`;
+        formattedText = `<div class="font-bold text-2xl mt-2">${selectedText}</div>`;
         break;
       default:
         formattedText = selectedText;

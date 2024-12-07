@@ -1,41 +1,42 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const CategoryItems = ({ category, onMouseEnter }) => {
-  const navigate = useNavigate();
-
+const CategoryItems = ({ category, onMouseEnter, onClick }) => {
   return (
-    <li
-      key={category._id}
-      className="py-2 px-4 flex justify-between items-center hover:bg-secondary cursor-pointer"
+    <div
+      className="flex items-center px-4 py-2 hover:bg-grey cursor-pointer transition-all duration-200 ease-in-out"
       onMouseEnter={onMouseEnter}
-      onClick={() => navigate(`product-list/${category.slug}`)}
+      onClick={() => onClick?.(category)}
     >
-      <div className="flex items-center">
-        <img
-          src={category.icon[0].url}
-          alt={category.title}
-          className="h-6 w-6"
-        />
-        <p className="font-light text-sm ml-[10px]">{category.title}</p>
+      <div className="flex items-center gap-3">
+        {category.icon && category.icon[0] && (
+          <img
+            src={category.icon[0].url}
+            alt={category.title}
+            className="w-[25px] h-[25px] transition-transform duration-200 group-hover:scale-105"
+          />
+        )}
+        <span className="text-sm transition-colors duration-200">
+          {category.title}
+        </span>
       </div>
-      <div>
+      <span className="ml-auto transition-transform duration-200 group-hover:translate-x-1">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
-          strokeWidth="1.5"
+          strokeWidth={1.5}
           stroke="currentColor"
-          className="size-6"
+          className="w-4 h-4"
         >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            d="m8.25 4.5 7.5 7.5-7.5 7.5"
+            d="M8.25 4.5l7.5 7.5-7.5 7.5"
           />
         </svg>
-      </div>
-    </li>
+      </span>
+    </div>
   );
 };
 

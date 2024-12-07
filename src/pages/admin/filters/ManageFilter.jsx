@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../../utils/axiosConfig";
-import { Input, Button, List, message, Card, Modal } from "antd";
+import { Input, Button, List, message, Card, Modal, Select } from "antd";
 
 function ManageOption() {
   const [filters, setFilters] = useState([]);
@@ -10,6 +10,8 @@ function ManageOption() {
   const [editingOption, setEditingOption] = useState(null);
   const [modalOptionTitle, setModalOptionTitle] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const itemsPerPage = 5;
   const adminToken = localStorage.getItem("adminToken");
@@ -18,6 +20,7 @@ function ManageOption() {
     try {
       const response = await axios.get("/filter", {
         headers: { Authorization: `Bearer ${adminToken}` },
+        params: selectedCategory ? { categoryID: selectedCategory } : {},
       });
       setFilters(response.data);
     } catch (error) {
@@ -26,9 +29,26 @@ function ManageOption() {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get("/category", {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      setCategories(response.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      message.error("Lỗi khi lấy danh sách danh mục");
+    }
+  };
+
   useEffect(() => {
+    fetchCategories();
     fetchFilters();
   }, []);
+
+  useEffect(() => {
+    fetchFilters();
+  }, [selectedCategory]);
 
   const handleFilterSave = async () => {
     if (!filterTitle.trim()) {
@@ -43,14 +63,20 @@ function ManageOption() {
         );
         await axios.put(
           `/filter/${editingFilterId}`,
-          { title: filterTitle, optionIDs: currentFilter.optionIDs },
+          {
+            title: filterTitle,
+            optionIDs: currentFilter.optionIDs,
+          },
           { headers: { Authorization: `Bearer ${adminToken}` } }
         );
         setEditingFilterId(null);
       } else {
         await axios.post(
           "/filter",
-          { title: filterTitle, optionIDs: [] },
+          {
+            title: filterTitle,
+            optionIDs: [],
+          },
           { headers: { Authorization: `Bearer ${adminToken}` } }
         );
       }
@@ -166,45 +192,79 @@ function ManageOption() {
   const totalPages = Math.ceil(filters.length / itemsPerPage);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">
+    <div className="p-8 max-w-7xl mx-auto bg-gray-50 min-h-screen">
+      <h1 className="text-3xl font-bold mb-8 text-gray-800 border-b pb-4">
         Quản lý Filter và Option
       </h1>
 
-      <Card className="mb-8 shadow-md">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-700">
-          Quản lý Filter
-        </h2>
-        <div className="flex gap-3 mb-4">
-          <Input
-            placeholder="Tiêu đề filter"
-            value={filterTitle}
-            onChange={(e) => setFilterTitle(e.target.value)}
-            className="flex-1"
-            size="large"
-          />
-          <Button type="primary" onClick={handleFilterSave} size="large">
-            {editingFilterId ? "Cập nhật Filter" : "Thêm Filter"}
-          </Button>
+      <Card className="mb-8 shadow-lg rounded-xl border-0">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold text-gray-700">
+            Quản lý Filter
+          </h2>
+          <div className="flex gap-3">
+            <Select
+              placeholder="Chọn danh mục"
+              value={selectedCategory}
+              onChange={(value) => setSelectedCategory(value)}
+              className="w-64"
+              size="large"
+              allowClear
+            >
+              {categories.map((cat) => (
+                <Select.Option key={cat._id} value={cat._id}>
+                  {cat.title}
+                </Select.Option>
+              ))}
+            </Select>
+
+            <Input
+              placeholder="Tiêu đề filter"
+              value={filterTitle}
+              onChange={(e) => setFilterTitle(e.target.value)}
+              className="w-64"
+              size="large"
+            />
+            <Button
+              type="primary"
+              onClick={handleFilterSave}
+              size="large"
+              className="bg-blue-500 hover:bg-blue-600"
+            >
+              {editingFilterId ? "Cập nhật Filter" : "Thêm Filter"}
+            </Button>
+          </div>
         </div>
 
         <List
-          bordered
+          bordered={false}
           dataSource={currentFilters}
-          className="bg-white rounded-lg"
+          className="bg-white rounded-xl divide-y"
           renderItem={(filter) => (
-            <List.Item className="hover:bg-gray-50">
+            <List.Item className="hover:bg-gray-50 p-6 first:rounded-t-xl last:rounded-b-xl">
               <div className="flex flex-col w-full space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-medium text-gray-700">
+                  <span className="text-xl font-medium text-gray-700">
                     {filter.title}
                   </span>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <Button
                       onClick={() => handleFilterDelete(filter._id)}
                       danger
-                      className="hover:opacity-80"
+                      className="hover:opacity-90 flex items-center gap-2"
                     >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
                       Xóa
                     </Button>
                     <Button
@@ -214,13 +274,22 @@ function ManageOption() {
                       }}
                       type="primary"
                       ghost
+                      className="flex items-center gap-2"
                     >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
                       Chỉnh sửa
                     </Button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {filter.optionIDs.length === 0 ? (
                     <span className="text-gray-500 italic">
                       Không có option nào.
@@ -299,7 +368,7 @@ function ManageOption() {
                     <Button
                       type="primary"
                       onClick={() => handleOptionCreate(filter._id)}
-                      className="flex items-center justify-center"
+                      className="flex items-center justify-center h-full"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -381,12 +450,13 @@ function ManageOption() {
         open={!!editingOption}
         onOk={handleOptionEdit}
         onCancel={() => setEditingOption(null)}
-        className="rounded-lg"
+        className="rounded-xl"
+        okButtonProps={{ className: "bg-blue-500 hover:bg-blue-600" }}
       >
         <Input
           value={modalOptionTitle}
           onChange={(e) => setModalOptionTitle(e.target.value)}
-          className="mt-2"
+          className="mt-4"
           size="large"
         />
       </Modal>

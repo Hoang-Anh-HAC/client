@@ -3,13 +3,26 @@ import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import axios from "../../utils/axiosConfig";
+import { formatPrice } from "../../utils/helpers";
 
-function SearchResult({ searchValue }) {
+function SearchResult({ searchValue, onClose }) {
   const [debouncedValue, setDebouncedValue] = useState(searchValue);
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
 
   const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
+
+  const handleProductClick = async (productSlug) => {
+    try {
+      await axios.put(`/product/${productSlug}/views`);
+      navigate(`/product/${productSlug}`);
+    } catch (error) {
+      console.error("Error updating views:", error);
+      navigate(`/product/${productSlug}`);
+    }
+
+    onClose();
+  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -60,6 +73,7 @@ function SearchResult({ searchValue }) {
                 key={item._id}
                 to={`/product/${item.slug}`}
                 className="flex items-center space-x-4 p-2 hover:bg-gray-50 border-b border-gray-100"
+                onClick={() => handleProductClick(item.slug)}
               >
                 <img
                   src={item.images?.[0]?.url || "/placeholder-image.png"}
@@ -71,7 +85,7 @@ function SearchResult({ searchValue }) {
                     {item.title}
                   </h3>
                   <p className="text-primary font-bold text-medium">
-                    {item.prices}
+                    {formatPrice(item.prices)}
                   </p>
                 </div>
               </Link>

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useFetchData } from "../../../hooks/useFetchData";
 import axios from "../../../utils/axiosConfig";
 import {
@@ -14,18 +14,29 @@ import {
   Spin,
   Checkbox,
   Tabs,
+  Card,
+  Divider,
+  Modal,
 } from "antd";
 import {
   MinusOutlined,
   MinusCircleOutlined,
   PlusCircleOutlined,
+  ArrowLeftOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import { useImageHandler } from "../../../hooks/useImageHandler";
+import { ADMIN_RANDOM_CODE_URL } from "../../../constants/adminConstants";
+import CustomTextArea from "../../../components/admin/forms/CustomTextArea";
 
 function EditProduct() {
   const { productSlug } = useParams();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
+  const [seriesParams, setSeriesParams] = useState({
+    categoryID: null,
+    brandID: null,
+  });
 
   const {
     fileList,
@@ -42,7 +53,7 @@ function EditProduct() {
     loading: productLoading,
     refetch: refetchProduct,
     setData: setProduct,
-  } = useFetchData(`/product/${productSlug}`, [productSlug]);
+  } = useFetchData(`/product/admin/${productSlug}`, [productSlug]);
 
   // Fetch categories
   const { data: categories = [], loading: categoriesLoading } =
@@ -57,11 +68,15 @@ function EditProduct() {
   );
 
   // Fetch series based on selected category and brand
-  const { data: series = [], loading: seriesLoading } = useFetchData(
-    product?.categoryID?._id && product?.brandID?._id
-      ? `series?categoryID=${product.categoryID._id}&brandID=${product.brandID._id}`
+  const {
+    data: seriesResponse = null,
+    loading: seriesLoading,
+    refetch: refetchSeries,
+  } = useFetchData(
+    seriesParams.categoryID && seriesParams.brandID
+      ? `series?categoryID=${seriesParams.categoryID}&brandID=${seriesParams.brandID}`
       : null,
-    [product?.categoryID?._id, product?.brandID?._id]
+    [seriesParams.categoryID, seriesParams.brandID]
   );
 
   // Thêm state để lưu trữ filters và options
@@ -87,7 +102,6 @@ function EditProduct() {
   // Fetch options khi có filters và lưu vào cache
   useEffect(() => {
     const fetchOptions = async () => {
-      // Kiểm tra nếu đã có options trong cache thì không fetch lại
       if (
         !cachedFilters?.length ||
         cachedFilters.some((filter) => filter.options)
@@ -98,7 +112,6 @@ function EditProduct() {
         const url = `option?${cachedFilters
           .map((filter) => `filterID=${filter._id}`)
           .join("&")}`;
-
         const { data: optionsData } = await axios.get(url);
         const updatedFilters = cachedFilters.map((filter) => ({
           ...filter,
@@ -116,7 +129,23 @@ function EditProduct() {
     };
 
     fetchOptions();
-  }, [cachedFilters?.length]);
+  }, [cachedFilters]);
+
+  useEffect(() => {
+    // Reset series khi thay đổi category hoặc brand
+    setProduct((prev) => ({
+      ...prev,
+      seriesID: null, // Xóa series đã chọn trước đó
+    }));
+
+    // Cập nhật params để fetch series mới
+    if (product?.categoryID?._id && product?.brandID?._id) {
+      setSeriesParams({
+        categoryID: product.categoryID._id,
+        brandID: product.brandID._id,
+      });
+    }
+  }, [product?.categoryID?._id, product?.brandID?._id]);
 
   // Save changes
   const handleSaveAll = async () => {
@@ -169,84 +198,66 @@ function EditProduct() {
   };
 
   // Specification handling
-  const handleSpecificationChange = useCallback(
-    (index, field, value) => {
-      setProduct((prev) => {
-        const newSpecs = [...prev.specifications];
-        newSpecs[index] = {
-          ...newSpecs[index],
-          [field]: value,
-        };
-        return {
-          ...prev,
-          specifications: newSpecs,
-        };
-      });
-      setIsEditing(true);
-    },
-    [setProduct]
-  );
+  const handleSpecificationChange = (specIndex, e) => {
+    const { name, value } = e.target;
+    setProduct((prev) => {
+      const newSpecs = [...prev.specifications];
+      newSpecs[specIndex][name] = value;
+      return { ...prev, specifications: newSpecs };
+    });
+    setIsEditing(true);
+  };
 
-  const handleAddSpecification = useCallback(() => {
+  const handleDetailChange = (specIndex, detailIndex, field, value) => {
+    setProduct((prev) => {
+      const newSpecs = [...prev.specifications];
+      newSpecs[specIndex].details[detailIndex][field] = value;
+      return { ...prev, specifications: newSpecs };
+    });
+    setIsEditing(true);
+  };
+
+  const handleAddDetail = (specIndex) => {
+    setProduct((prev) => {
+      const newSpecs = [...prev.specifications];
+      newSpecs[specIndex].details.push({ title: "", description: "" });
+      return { ...prev, specifications: newSpecs };
+    });
+    setIsEditing(true);
+  };
+
+  const handleRemoveDetail = (specIndex, detailIndex) => {
+    setProduct((prev) => {
+      const newSpecs = [...prev.specifications];
+      newSpecs[specIndex].details = newSpecs[specIndex].details.filter(
+        (_, idx) => idx !== detailIndex
+      );
+      return { ...prev, specifications: newSpecs };
+    });
+    setIsEditing(true);
+  };
+
+  const handleAddSpecification = () => {
     setProduct((prev) => ({
       ...prev,
       specifications: [
-        ...(prev.specifications || []),
-        { title: "", details: "" },
+        ...prev.specifications,
+        {
+          topic: "",
+          details: [{ title: "", description: "" }],
+        },
       ],
     }));
     setIsEditing(true);
-  }, [setProduct]);
+  };
 
-  const handleRemoveSpecification = useCallback(
-    (index) => {
-      setProduct((prev) => ({
-        ...prev,
-        specifications: prev.specifications.filter((_, i) => i !== index),
-      }));
-      setIsEditing(true);
-    },
-    [setProduct]
-  );
-
-  const handleValueChange = useCallback(
-    (field, value) => {
-      setProduct((prev) => {
-        // Xử lý đặc biệt cho categoryID, brandID, và seriesID
-        if (field === "categoryID") {
-          return {
-            ...prev,
-            categoryID: { _id: value },
-            brandID: null, // Reset brandID khi thay đổi category
-            seriesID: null, // Reset seriesID khi thay đổi category
-          };
-        }
-
-        if (field === "brandID") {
-          return {
-            ...prev,
-            brandID: { _id: value },
-            seriesID: null, // Reset seriesID khi thay đổi brand
-          };
-        }
-
-        if (field === "seriesID") {
-          return {
-            ...prev,
-            seriesID: { _id: value },
-          };
-        }
-
-        // Xử lý cho các trường thông thường
-        return {
-          ...prev,
-          [field]: value,
-        };
-      });
-      setIsEditing(true);
-    },
-    [setProduct]
-  );
+  const handleRemoveSpecification = (index) => {
+    setProduct((prev) => ({
+      ...prev,
+      specifications: prev.specifications.filter((_, idx) => idx !== index),
+    }));
+    setIsEditing(true);
+  };
 
   // Thay thế nhiều state loading riêng lẻ bằng một object
   const [loadingStates, setLoadingStates] = useState({
@@ -270,6 +281,8 @@ function EditProduct() {
 
   // Thêm hàm xử lý xóa ảnh trong EditProduct
   const handleImageRemove = async (publicId) => {
+    console.log(publicId);
+
     const deletedId = await handleRemoveFromServer(publicId);
     if (deletedId) {
       setProduct((prev) => ({
@@ -280,301 +293,500 @@ function EditProduct() {
     }
   };
 
+  const navigate = useNavigate();
+
+  const handleCategoryChange = (value) => {
+    Modal.confirm({
+      title: "Xác nhận thay đổi danh mục",
+      content:
+        "Khi thay đổi danh mục, tất cả bộ lọc đã chọn sẽ bị xóa. Bạn có chắc chắn muốn thay đổi?",
+      okText: "Đồng ý",
+      cancelText: "Hủy",
+      onOk: () => {
+        handleValueChange("categoryID", value);
+        setCachedFilters([]); // Reset cached filters
+        setProduct((prev) => ({
+          ...prev,
+          optionIDs: [], // Reset selected options
+        }));
+        setIsEditing(true);
+      },
+    });
+  };
+
+  const handleValueChange = (field, value) => {
+    setProduct((prev) => {
+      let updatedProduct = {
+        ...prev,
+        [field]: value,
+      };
+
+      // Nếu thay đổi category, reset brand và series
+      if (field === "categoryID") {
+        updatedProduct.brandID = null;
+        updatedProduct.seriesID = null;
+      }
+
+      // Nếu thay đổi brand, reset series
+      if (field === "brandID") {
+        updatedProduct.seriesID = null;
+      }
+
+      return updatedProduct;
+    });
+    setIsEditing(true);
+  };
+
+  const [inputRelatedProductID, setInputRelatedProductID] = useState("");
+
+  // Thêm state để lưu trữ sản phẩm liên quan
+  const handleAddRelatedProduct = (productID) => {
+    if (!productID.trim() || product.relatedProducts.includes(productID))
+      return message.error("Đã có mã này");
+
+    // Cập nhật sản phẩm liên quan
+    setProduct((prev) => ({
+      ...prev,
+      relatedProducts: [...prev.relatedProducts, productID], // Thêm sản phẩm vào danh sách
+    }));
+
+    // Lưu sản phẩm ngay lập tức
+
+    setIsEditing(true); // Đảm bảo nút lưu hoạt động
+
+    setInputRelatedProductID(""); // Reset input
+  };
+
+  const handleRemoveRelatedProduct = (productID) => {
+    setProduct((prev) => {
+      const updatedRelatedProducts = prev.relatedProducts.filter(
+        (id) => id !== productID
+      ); // Loại bỏ sản phẩm khỏi danh sách
+      return {
+        ...prev,
+        relatedProducts: updatedRelatedProducts,
+      };
+    });
+    setIsEditing(true); // Đảm bảo nút lưu hoạt động
+
+    // Lưu sản phẩm ngay lập tức
+  };
+
   return (
     <Spin spinning={isPageLoading} tip="Đang tải...">
-      <div className="p-5 max-w-3xl mx-auto">
-        <h1 className="text-center text-2xl font-semibold mb-6">
-          Chỉnh sửa sản phẩm
-        </h1>
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Header Section */}
+        <Card className="mb-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <Button
+                icon={<ArrowLeftOutlined />}
+                onClick={() =>
+                  navigate(`/${ADMIN_RANDOM_CODE_URL}/manage-product`)
+                }
+                type="text"
+                className="hover:bg-gray-100"
+              >
+                Quay lại
+              </Button>
+              <h1 className="text-2xl font-bold m-0">Chỉnh sửa sản phẩm</h1>
+            </div>
+            <Button
+              type="primary"
+              onClick={handleSaveAll}
+              disabled={!isEditing}
+              className="bg-blue-500"
+            >
+              Lưu thay đổi
+            </Button>
+          </div>
+        </Card>
 
         {!product ? (
-          <p className="text-center">Không tìm thấy sản phẩm</p>
+          <div className="text-center">Không tìm thấy sản phẩm</div>
         ) : (
-          <Tabs activeKey={activeTab} onChange={setActiveTab}>
-            <Tabs.TabPane tab="Thông tin cơ bản" key="basic">
-              <Form layout="vertical">
-                <Form.Item label="Tiêu đề">
-                  <Input
-                    value={product?.title}
-                    onChange={(e) => handleValueChange("title", e.target.value)}
-                  />
-                </Form.Item>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - Basic Info */}
+            <div className="lg:col-span-2">
+              <Tabs
+                activeKey={activeTab}
+                onChange={setActiveTab}
+                items={[
+                  {
+                    key: "basic",
+                    label: "Thông tin cơ bản",
+                    children: (
+                      <>
+                        {" "}
+                        <Card title="Thông Tin Cơ Bản" className="mb-6">
+                          <div className="space-y-4">
+                            <Form.Item label="Tên Sản Phẩm">
+                              <Input
+                                value={product?.title}
+                                onChange={(e) =>
+                                  handleValueChange("title", e.target.value)
+                                }
+                                placeholder="Nhập Tên Sản Phẩm"
+                              />
+                            </Form.Item>
 
-                <Form.Item label="Mã Sản Phẩm">
-                  <Input
-                    value={product.productID}
-                    onChange={(e) =>
-                      handleValueChange("productID", e.target.value)
-                    }
-                  />
-                </Form.Item>
+                            <div className="grid grid-cols-2 gap-4">
+                              <Form.Item label="Mã Sản Phẩm">
+                                <Input
+                                  value={product.productID}
+                                  onChange={(e) =>
+                                    handleValueChange(
+                                      "productID",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Nhập Mã Sản Phẩm"
+                                />
+                              </Form.Item>
+                              <Form.Item label="Số Lượng">
+                                <Input
+                                  type="number"
+                                  value={product.quantity}
+                                  onChange={(e) =>
+                                    handleValueChange(
+                                      "quantity",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </Form.Item>
+                            </div>
 
-                <Form.Item label="Mô tả">
-                  <Input.TextArea
-                    value={product.description}
-                    onChange={(e) =>
-                      handleValueChange("description", e.target.value)
-                    }
-                  />
-                </Form.Item>
+                            <Form.Item label="Giá Sản Phẩm">
+                              <Input
+                                value={product.prices}
+                                onChange={(e) =>
+                                  handleValueChange("prices", e.target.value)
+                                }
+                                placeholder="Nhập Giá Sản Phẩm"
+                              />
+                            </Form.Item>
+                          </div>
+                        </Card>{" "}
+                        <Card
+                          title="Mô Tả & Thông Số Kỹ Thuật"
+                          className="mb-6"
+                        >
+                          <CustomTextArea
+                            label="Mô Tả"
+                            name="description"
+                            value={product.description}
+                            onChange={(e) =>
+                              handleValueChange("description", e.target.value)
+                            }
+                            placeholder="Nhập mô tả sản phẩm..."
+                            className="mb-4"
+                          />
 
-                <Form.Item label="Giá">
-                  <Input
-                    value={product.prices}
-                    onChange={(e) =>
-                      handleValueChange("prices", e.target.value)
-                    }
-                  />
-                </Form.Item>
+                          <Divider />
 
-                <Form.Item label="Số lượng">
-                  <Input
-                    type="number"
-                    value={product.quantity}
-                    onChange={(e) =>
-                      handleValueChange("quantity", e.target.value)
-                    }
-                  />
-                </Form.Item>
+                          <div className="specifications-section">
+                            <h3 className="font-medium mb-4">
+                              Thông Số Kỹ Thuật
+                            </h3>
 
-                <Form.Item label="Danh mục">
-                  <Select
-                    value={product?.categoryID?._id}
-                    onChange={(value) => handleValueChange("categoryID", value)}
-                    options={
-                      categories?.map((category) => ({
+                            {product?.specifications?.map((spec, specIndex) => (
+                              <div
+                                key={specIndex}
+                                className="bg-gray-50 p-4 rounded-lg mb-4"
+                              >
+                                <div className="mb-4">
+                                  <input
+                                    type="text"
+                                    name="topic"
+                                    value={spec.topic}
+                                    onChange={(e) =>
+                                      handleSpecificationChange(specIndex, e)
+                                    }
+                                    className="w-full p-2 border border-gray-300 rounded"
+                                    placeholder="Chủ đề (không bắt buộc)"
+                                  />
+                                </div>
+
+                                {spec.details.map((detail, detailIndex) => (
+                                  <div
+                                    key={detailIndex}
+                                    className="grid grid-cols-2 gap-4 mb-2"
+                                  >
+                                    <input
+                                      type="text"
+                                      value={detail.title}
+                                      onChange={(e) =>
+                                        handleDetailChange(
+                                          specIndex,
+                                          detailIndex,
+                                          "title",
+                                          e.target.value
+                                        )
+                                      }
+                                      className="w-full p-2 border border-gray-300 rounded"
+                                      placeholder="Tiêu đề"
+                                    />
+                                    <div className="flex gap-2">
+                                      <textarea
+                                        value={detail.description}
+                                        onChange={(e) =>
+                                          handleDetailChange(
+                                            specIndex,
+                                            detailIndex,
+                                            "description",
+                                            e.target.value
+                                          )
+                                        }
+                                        className="w-full p-2 border border-gray-300 rounded resize-y min-h-[40px]"
+                                        placeholder="Mô tả"
+                                      />
+                                      <Button
+                                        danger
+                                        icon={<MinusCircleOutlined />}
+                                        onClick={() =>
+                                          handleRemoveDetail(
+                                            specIndex,
+                                            detailIndex
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+                                ))}
+
+                                <div className="flex justify-between mt-2">
+                                  <Button
+                                    type="dashed"
+                                    onClick={() => handleAddDetail(specIndex)}
+                                    icon={<PlusOutlined />}
+                                  >
+                                    Thêm Chi Tiết
+                                  </Button>
+                                  <Button
+                                    danger
+                                    onClick={() =>
+                                      handleRemoveSpecification(specIndex)
+                                    }
+                                    icon={<MinusOutlined />}
+                                  >
+                                    Xóa Mục
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+
+                            <Button
+                              type="dashed"
+                              icon={<PlusOutlined />}
+                              onClick={handleAddSpecification}
+                              className="w-full"
+                            >
+                              Thêm Mục Thông Số
+                            </Button>
+                          </div>
+                        </Card>
+                      </>
+                    ),
+                  },
+                  {
+                    key: "filters",
+                    label: "Bộ lọc",
+                    children: (
+                      <Card>
+                        {cachedFilters?.map((filter) => (
+                          <div key={filter._id} className="mb-4">
+                            <label className="block mb-2 font-medium">
+                              {filter.title}:
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                              {filter.options?.map((option) => (
+                                <Checkbox
+                                  key={option._id}
+                                  checked={product?.optionIDs?.some(
+                                    (optionId) => optionId._id === option._id
+                                  )}
+                                  onChange={() =>
+                                    handleFilterSelected(option._id)
+                                  }
+                                  className="border border-gray-300 rounded px-2 py-1 hover:bg-gray-100"
+                                >
+                                  {option.title}
+                                </Checkbox>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </Card>
+                    ),
+                  },
+                ]}
+              />
+            </div>
+
+            {/* Right Column */}
+            <div className="lg:col-span-1">
+              <Card title="Hình Ảnh Sản Phẩm" className="mb-6">
+                <Spin spinning={imageLoading} tip="Đang xử lý...">
+                  <div className="grid grid-cols-2 gap-2">
+                    {product?.images?.map((img) => (
+                      <div key={img.public_id} className="relative group">
+                        <img
+                          src={img.url}
+                          alt="product"
+                          className="w-full h-32 object-cover rounded"
+                        />
+                        <Button
+                          danger
+                          icon={<MinusOutlined />}
+                          onClick={() => handleImageRemove(img.public_id)}
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        />
+                      </div>
+                    ))}
+
+                    {fileList.map((file) => (
+                      <div key={file.uid} className="relative group">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt="preview"
+                          className="w-full h-32 object-cover rounded"
+                        />
+                        <Button
+                          danger
+                          icon={<MinusOutlined />}
+                          onClick={() => handleRemoveFromFileList(file)}
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <Upload
+                    showUploadList={false}
+                    beforeUpload={(file) => {
+                      setIsEditing(true);
+                      return handleAddToFileList(file);
+                    }}
+                    accept="image/*"
+                    disabled={imageLoading}
+                    className="mt-4"
+                  >
+                    <Button icon={<PlusCircleOutlined />} block>
+                      Tải lên hình ảnh
+                    </Button>
+                  </Upload>
+                </Spin>
+              </Card>
+
+              <Card title="Phân Loại" className="mb-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block mb-2 font-medium">Danh Mục:</label>
+                    <Select
+                      value={product?.categoryID?._id}
+                      onChange={handleCategoryChange}
+                      options={categories?.map((category) => ({
                         value: category._id,
                         label: category.title,
-                      })) || []
-                    }
-                    placeholder="Chọn danh mục"
-                    allowClear
-                    showSearch
-                    optionFilterProp="label"
-                    loading={categoriesLoading}
-                  />
-                </Form.Item>
+                      }))}
+                      placeholder="Chọn danh mục"
+                      className="w-full"
+                    />
+                  </div>
 
-                <Form.Item label="Thương hiệu">
-                  <Select
-                    value={product?.brandID?._id}
-                    onChange={(value) => handleValueChange("brandID", value)}
-                    options={
-                      brands?.map((brand) => ({
+                  <div>
+                    <label className="block mb-2 font-medium">
+                      Thương Hiệu:
+                    </label>
+                    <Select
+                      value={product?.brandID?._id}
+                      onChange={(value) => handleValueChange("brandID", value)}
+                      options={brands?.map((brand) => ({
                         value: brand._id,
                         label: brand.title,
-                      })) || []
-                    }
-                    placeholder="Chọn thương hiệu"
-                    loading={brandsLoading}
-                    disabled={!product?.categoryID}
-                  />
-                </Form.Item>
+                      }))}
+                      placeholder="Chọn thương hiệu"
+                      className="w-full"
+                      disabled={!product?.categoryID}
+                    />
+                  </div>
 
-                <Form.Item label="Dòng sản phẩm">
-                  <Select
-                    value={product?.seriesID?._id}
-                    onChange={(value) => handleValueChange("seriesID", value)}
-                    options={
-                      series?.map((serie) => ({
+                  <div>
+                    <label className="block mb-2 font-medium">
+                      Dòng Sản Phẩm:
+                    </label>
+                    <Select
+                      value={product?.seriesID?._id}
+                      onChange={(value) => handleValueChange("seriesID", value)}
+                      options={(seriesResponse?.data || [])?.map((serie) => ({
                         value: serie._id,
                         label: serie.title,
-                      })) || []
-                    }
-                    placeholder="Chọn dòng sản phẩm"
-                    loading={seriesLoading}
-                    disabled={!product?.brandID}
-                  />
-                </Form.Item>
-
-                <Form.Item label="Hình ảnh sản phẩm">
-                  <Spin spinning={imageLoading} tip="Đang xử lý...">
-                    <div className="flex flex-wrap gap-2">
-                      {product?.images?.map((img) => (
-                        <div
-                          key={img.public_id}
-                          className="relative flex items-center justify-center"
-                        >
-                          <img
-                            src={img.url}
-                            alt="product"
-                            className="w-24 h-24 object-cover"
-                          />
-                          <Button
-                            icon={<MinusOutlined />}
-                            onClick={() => handleImageRemove(img.public_id)}
-                            className="absolute top-0 right-0"
-                            loading={imageLoading}
-                          />
-                        </div>
-                      ))}
-
-                      {fileList.map((file) => (
-                        <div
-                          key={file.uid}
-                          className="relative flex items-center justify-center"
-                        >
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt="preview"
-                            className="w-24 h-24 object-cover"
-                          />
-                          <Button
-                            icon={<MinusOutlined />}
-                            onClick={() => handleRemoveFromFileList(file)}
-                            className="absolute top-0 right-0"
-                            loading={imageLoading}
-                          />
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="flex gap-2 mt-2">
-                      <Upload
-                        showUploadList={false}
-                        beforeUpload={(file) => {
-                          setIsEditing(true);
-                          return handleAddToFileList(file);
-                        }}
-                        accept="image/*"
-                        disabled={imageLoading}
-                      >
-                        <Button
-                          icon={<PlusCircleOutlined />}
-                          loading={imageLoading}
-                        >
-                          Tải lên hình ảnh
-                        </Button>
-                      </Upload>
-                    </div>
-                  </Spin>
-                </Form.Item>
-
-                <Form.Item label="Thông số kỹ thuật">
-                  {product?.specifications &&
-                    product.specifications.map((spec, index) => (
-                      <Row key={index} gutter={16}>
-                        <Col span={11}>
-                          <Input
-                            placeholder="Tiêu đề"
-                            value={spec.title}
-                            onChange={(e) =>
-                              handleSpecificationChange(
-                                index,
-                                "title",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </Col>
-                        <Col span={11}>
-                          <Input
-                            placeholder="Chi tiết"
-                            value={spec.details}
-                            onChange={(e) =>
-                              handleSpecificationChange(
-                                index,
-                                "details",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </Col>
-                        <Col span={2}>
-                          <Button
-                            icon={<MinusCircleOutlined />}
-                            onClick={() => handleRemoveSpecification(index)}
-                          />
-                        </Col>
-                      </Row>
-                    ))}
-                  <Button
-                    type="dashed"
-                    onClick={handleAddSpecification}
-                    icon={<PlusCircleOutlined />}
-                  >
-                    Thêm thông số
-                  </Button>
-                </Form.Item>
-
-                <Button
-                  type="primary"
-                  onClick={handleSaveAll}
-                  disabled={!isEditing}
-                >
-                  Lưu
-                </Button>
-              </Form>
-            </Tabs.TabPane>
-
-            <Tabs.TabPane tab="Bộ lọc" key="filters">
-              {activeTab === "filters" && (
-                <div className="mt-4">
-                  {!product?.categoryID ? (
-                    <div className="text-center text-gray-500">
-                      Vui lòng chọn danh mục trước
-                    </div>
-                  ) : cachedFilters && cachedFilters.length > 0 ? (
-                    <>
-                      <table className="min-w-full border-collapse border border-gray-300">
-                        <thead>
-                          <tr>
-                            <th className="border border-gray-300 p-2">
-                              Tên bộ lọc
-                            </th>
-                            <th className="border border-gray-300 p-2">
-                              Tùy chọn
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {cachedFilters.map((filter) => (
-                            <tr key={filter._id}>
-                              <td className="border border-gray-300 p-2">
-                                {filter.title}
-                              </td>
-                              <td className="border border-gray-300 p-2">
-                                <ul className="grid grid-cols-4 gap-2">
-                                  {filter.options?.map((option) => (
-                                    <li key={option._id}>
-                                      <Checkbox
-                                        checked={product?.optionIDs?.some(
-                                          (optionId) =>
-                                            optionId._id === option._id
-                                        )}
-                                        onChange={() =>
-                                          handleFilterSelected(option._id)
-                                        }
-                                      >
-                                        {option.title}
-                                      </Checkbox>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-
-                      <Button
-                        type="primary"
-                        onClick={handleSaveAll}
-                        disabled={!isEditing}
-                        className="mt-4"
-                      >
-                        Lưu thay đổi
-                      </Button>
-                    </>
-                  ) : (
-                    <div className="text-center text-gray-500">
-                      Không có bộ lọc nào cho danh mục này
-                    </div>
-                  )}
+                      }))}
+                      placeholder="Chọn dòng sản phẩm"
+                      className="w-full"
+                      disabled={
+                        !product?.categoryID ||
+                        !product?.brandID ||
+                        seriesLoading
+                      }
+                      loading={seriesLoading}
+                    />
+                  </div>
                 </div>
-              )}
-            </Tabs.TabPane>
-          </Tabs>
+              </Card>
+
+              {/* Related Products Section */}
+              <Card title="Sản Phẩm Liên Quan" className="mb-6">
+                <div>
+                  <label className="block mb-2 font-medium">
+                    Nhập Product ID:
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Nhập Product ID"
+                      value={inputRelatedProductID}
+                      onChange={(e) => setInputRelatedProductID(e.target.value)}
+                      className="border rounded px-3 py-2 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={() =>
+                        handleAddRelatedProduct(inputRelatedProductID)
+                      }
+                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200"
+                    >
+                      Thêm
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <h3 className="font-medium mb-2">
+                    Danh sách sản phẩm liên quan:
+                  </h3>
+                  <ul className="space-y-2">
+                    {Array.isArray(product.relatedProducts) &&
+                      product.relatedProducts.map((productID) => (
+                        <li
+                          key={productID}
+                          className="border rounded px-3 py-2 flex justify-between items-center bg-gray-100 hover:bg-gray-200 transition duration-200"
+                        >
+                          <span className="text-gray-800">{productID}</span>
+                          <button
+                            onClick={() =>
+                              handleRemoveRelatedProduct(productID)
+                            }
+                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-200"
+                          >
+                            Xóa
+                          </button>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              </Card>
+            </div>
+          </div>
         )}
       </div>
     </Spin>

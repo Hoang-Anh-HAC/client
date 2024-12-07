@@ -10,7 +10,12 @@ import AdminLayout from "./layouts/AdminLayout";
 // Admin Pages
 import LoginAdmin from "./pages/admin/auth/LoginAdmin";
 import HomeAdmin from "./pages/admin/dashboard/HomeAdmin";
-import { ManageProduct, AddProduct, EditProduct } from "./pages/admin/products";
+import {
+  ManageProduct,
+  AddProduct,
+  EditProduct,
+  ViewProduct,
+} from "./pages/admin/products";
 import ManageBrand from "./pages/admin/brands/ManageBrand";
 import ManageCategory from "./pages/admin/categories/ManageCategory";
 import ManageFilter from "./pages/admin/filters/ManageFilter";
@@ -22,6 +27,7 @@ import HomePage from "./pages/user/HomePage";
 import ProductList from "./pages/user/ProductList";
 import ProductDetail from "./pages/user/ProductDetail";
 import About from "./pages/user/About";
+import Contact from "./pages/user/Contact";
 
 // Components
 import ProtectedRoute from "./components/admin/layout/ProtectedRoute";
@@ -32,6 +38,7 @@ const userRoutes = [
   { path: "product-list/:categorySlug/:brandSlug?", element: <ProductList /> },
   { path: "product/:slug", element: <ProductDetail /> },
   { path: "about", element: <About /> },
+  { path: "contact", element: <Contact /> },
 ];
 
 const adminRoutes = [
@@ -44,6 +51,10 @@ const adminRoutes = [
   { path: "form", element: <ManageForm /> },
   { path: "manage-product/add-product", element: <AddProduct /> },
   { path: "manage-product/product/:productSlug", element: <EditProduct /> },
+  {
+    path: "manage-product/product/view/:productSlug",
+    element: <ViewProduct />,
+  },
 ];
 
 function App() {

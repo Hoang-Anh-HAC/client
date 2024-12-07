@@ -24,11 +24,12 @@ const ProductSeriesFilter = ({
       try {
         setLoading(true);
         const params = new URLSearchParams();
+
         params.append("categoryID", category._id);
         params.append("brandID", brand._id);
 
         const response = await axios.get(`series?${params.toString()}`);
-        setSeries(response.data);
+        setSeries(response.data.data);
         setSelectedSeries(null);
       } catch (error) {
         console.error("Error fetching series:", error);

@@ -1,17 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CategoryItems from "./CategoryItems";
 import BrandCategory from "./BrandCategory";
 import { useData } from "../../contexts/DataContext";
+import { useNavigate } from "react-router-dom";
 
-const CategoryList = () => {
+const CategoryList = ({ onClose }) => {
   const { categories } = useData();
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const navigate = useNavigate();
   const [hoveredCategory, setHoveredCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const handleCategoryClick = (category) => {
-    setSelectedCategory(
-      selectedCategory?._id === category._id ? null : category
-    );
+    console.log("Category clicked, closing list...");
+    navigate(`/product-list/${category.slug}`);
+    onClose?.();
   };
 
   const handleMouseEnter = (category) => {
@@ -39,7 +41,7 @@ const CategoryList = () => {
             key={category._id}
             category={category}
             onMouseEnter={() => handleMouseEnter(category)}
-            onClick={() => handleCategoryClick(category)}
+            onClick={handleCategoryClick}
           />
         ))}
 
@@ -48,6 +50,10 @@ const CategoryList = () => {
           <BrandCategory
             category={hoveredCategory}
             onMouseLeave={handleMouseLeave}
+            onSelectBrand={(brandSlug) => {
+              navigate(`/product-list/${hoveredCategory.slug}/${brandSlug}`);
+              onClose?.();
+            }}
           />
         </div>
       )}
@@ -57,6 +63,10 @@ const CategoryList = () => {
           <BrandCategory
             category={selectedCategory}
             onMouseLeave={() => setSelectedCategory(null)}
+            onSelectBrand={(brandSlug) => {
+              navigate(`/product-list/${selectedCategory.slug}/${brandSlug}`);
+              onClose?.();
+            }}
           />
         </div>
       )}

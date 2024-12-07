@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../utils/axiosConfig";
-import { Button, Skeleton, Image } from "antd";
+import { Button, Skeleton, Image, Empty } from "antd";
 import { useNavigate } from "react-router-dom";
+import { formatPrice } from "../../utils/helpers";
+import { InboxOutlined } from "@ant-design/icons";
 
 const Product = ({
   category,
@@ -13,6 +15,7 @@ const Product = ({
   setTotalProducts,
   options,
   onViewAllImages,
+  sortType,
 }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +29,7 @@ const Product = ({
 
       if (!category?._id) {
         setLoading(false);
+        setTotalProducts(0);
         return;
       }
 
@@ -48,19 +52,21 @@ const Product = ({
 
         queryParams.append("page", page);
         queryParams.append("limit", limit);
+        queryParams.append("sort", sortType);
 
         const response = await axios.get(`/product?${queryParams.toString()}`);
 
-        // Kiểm tra dữ liệu trả về từ API
         if (response.data?.products?.length === 0) {
           setError("Không có sản phẩm trong danh mục này.");
           setProducts([]);
+          setTotalProducts(0);
         } else if (response.data?.products) {
           setProducts(response.data.products);
           setTotalProducts(response.data.totalProducts);
         } else {
           setError("Đã xảy ra lỗi khi tải sản phẩm.");
           setProducts([]);
+          setTotalProducts(0);
         }
       } catch (error) {
         if (error.response && error.response.status === 404) {
@@ -69,14 +75,25 @@ const Product = ({
           console.error("Error fetching products:", error);
           setError("Đã xảy ra lỗi khi tải sản phẩm.");
         }
-        setProducts([]); // Đảm bảo reset danh sách sản phẩm khi lỗi
+        setProducts([]);
+        setTotalProducts(0);
       } finally {
-        setLoading(false); // Đảm bảo set loading về false dù xảy ra bất kỳ lỗi nào
+        setLoading(false);
       }
     };
 
     fetchProducts();
-  }, [category?._id, brand?._id, series, page, limit, options]);
+  }, [category?._id, brand?._id, series, page, limit, options, sortType]);
+
+  const handleProductClick = async (product) => {
+    try {
+      await axios.put(`/product/${product.slug}/views`);
+      navigate(`/product/${product.slug}`);
+    } catch (error) {
+      console.error("Error updating views:", error);
+      navigate(`/product/${product.slug}`);
+    }
+  };
 
   if (loading)
     return (
@@ -85,46 +102,66 @@ const Product = ({
       </div>
     );
 
-  if (error) return <p>{error}</p>;
+  if (error) {
+    return (
+      <div className="col-span-full flex flex-col items-center justify-center min-h-[300px]">
+        <InboxOutlined className="text-4xl text-gray-400 mb-4" />
+        <h3 className="text-lg text-gray-600">
+          Không có sản phẩm trong danh mục này
+        </h3>
+      </div>
+    );
+  }
 
   return (
     <>
       {products.length === 0 ? (
-        <p>Sản phẩm đang cập nhật...</p>
+        <div className="col-span-full flex flex-col items-center justify-center min-h-[300px]">
+          <InboxOutlined className="text-4xl text-gray-400 mb-4" />
+          <h3 className="text-lg text-gray-600">Sản phẩm đang cập nhật</h3>
+        </div>
       ) : (
         products.map((product) => (
           <div
             key={product._id}
-            className="flex flex-col h-[180px] min-[380px]:h-[250px] xs:h-[280px] sm:h-[300px] w-full max-w-[150px] min-[380px]:max-w-[180px] xs:max-w-[200px] sm:max-w-full border-[1px] hover:border-black rounded-md cursor-pointer overflow-hidden group"
-            onClick={() => {
-              navigate(`/product/${product.slug}`);
-            }}
+            className="flex flex-col h-[220px] min-[380px]:h-[280px] xs:h-[300px] sm:h-[350px] w-full max-w-[180px] min-[380px]:max-w-[200px] xs:max-w-[220px] sm:max-w-full border-[1px] hover:border-grey border-white cursor-pointer overflow-hidden group"
+            onClick={() => handleProductClick(product)}
           >
-            <div className="relative h-[100px] min-[380px]:h-[140px] xs:h-[160px] sm:h-[180px] w-full overflow-hidden p-1 min-[380px]:p-2 xs:p-3">
+            <div className="flex items-center justify-center bg-gray-100 relative h-[130px] min-[380px]:h-[160px] xs:h-[180px] sm:h-[220px] w-full overflow-hidden min-[380px]:p-2 xs:p-3">
               <Image
                 src={product.images?.[0]?.url || "/placeholder-image.png"}
                 alt={product.title}
-                className="w-full h-full object-contain transition-transform duration-300 ease-in-out transform group-hover:scale-110"
+                className="p-6 w-full h-full object-contain transition-transform duration-300 ease-in-out transform group-hover:scale-110"
                 preview={false}
               />
             </div>
 
-            <div className="flex flex-col justify-between h-[80px] min-[380px]:h-[110px] xs:h-[120px] p-1 min-[380px]:p-2 xs:p-3">
-              <h3 className="text-[9px] min-[380px]:text-xs xs:text-sm font-normal line-clamp-2">
+            <div className="flex flex-col justify-between h-[90px] min-[380px]:h-[120px] xs:h-[120px] p-2 min-[380px]:p-3 xs:p-4 relative">
+              <p className="text-[16px] min-[380px]:text-[14px] xs:text-base font-normal line-clamp-2">
                 {product.title}
-              </h3>
+              </p>
 
               <div>
-                <p className="text-[10px] min-[380px]:text-sm xs:text-md font-bold text-primary mb-1 xs:mb-2">
-                  {product.prices}
+                <p className="text-[20px] min-[380px]:text-[19px] xs:text-xl font-semibold text-primary xs:mb-2">
+                  {formatPrice(product.prices)}
                 </p>
-                <Button
-                  color="primary"
-                  variant="outlined"
-                  className="w-full h-[20px] min-[380px]:h-[28px] xs:h-[32px] text-[9px] min-[380px]:text-xs xs:text-sm"
+              </div>
+
+              <div className="absolute bottom-2 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-4"
                 >
-                  Xem Ngay
-                </Button>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"
+                  />
+                </svg>
               </div>
             </div>
           </div>

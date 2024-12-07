@@ -10,7 +10,9 @@ import {
   Form,
   Input,
 } from "antd";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { formatPrice } from "../../utils/helpers";
+import Product from "../../components/user/Product";
 
 function ProductDetail() {
   const { slug } = useParams();
@@ -39,6 +41,9 @@ function ProductDetail() {
 
   const [verification, setVerification] = useState(generateQuestion());
 
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [loadingRelated, setLoadingRelated] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -51,6 +56,33 @@ function ProductDetail() {
     };
     fetchData();
   }, [slug]);
+
+  useEffect(() => {
+    const fetchRelatedProducts = async () => {
+      if (!product) return;
+
+      setLoadingRelated(true);
+      try {
+        const response = await axios.get("/product", {
+          params: {
+            categoryID: product.categoryID._id,
+            brandID: product.brandID._id,
+            limit: 10,
+            page: 1,
+          },
+        });
+        setRelatedProducts(
+          response.data.products.filter((p) => p._id !== product._id)
+        );
+      } catch (error) {
+        console.error("Lỗi khi tải sản phẩm liên quan:", error);
+      } finally {
+        setLoadingRelated(false);
+      }
+    };
+
+    fetchRelatedProducts();
+  }, [product]);
 
   if (loading)
     return (
@@ -121,36 +153,36 @@ function ProductDetail() {
         <Breadcrumb
           items={[
             { title: <a href="/">Trang Chủ</a> },
-            { title: product.categoryID.title || "Loading..." },
-            { title: product.brandID.title || "Loading..." },
-            { title: product.seriesID.title || "Loading..." },
+            { title: product.categoryID?.title || "Loading..." },
+            { title: product.brandID?.title || "Loading..." },
+            { title: product.title || "Loading..." },
           ]}
           className="w-full py-3"
         />
 
         <div className="bg-white p-4 lg:p-6 flex flex-col lg:flex-row gap-6 lg:gap-10">
-          <div className="w-full lg:w-[500px] flex flex-col">
+          <div className="w-full lg:w-[500px] flex flex-col items-center">
             <Image
               src={mainImage || product.images[0]?.url || ""}
               alt={product.title}
               className="w-full mb-4 object-contain"
             />
             <div className="flex gap-2 flex-wrap">
-              {product.images.slice(0, 3).map((image, index) => (
+              {product.images.slice(0, 4).map((image, index) => (
                 <div key={index} className="relative">
                   <img
                     src={image.url}
                     alt={`${product.title} ${index}`}
-                    className={`w-20 h-20 border cursor-pointer ${
+                    className={`w-20 h-20 border cursor-pointer  ${
                       mainImage === image.url
                         ? "border-blue-500"
                         : "border-gray-300"
                     }`}
                     onClick={() => setMainImage(image.url)}
                   />
-                  {index === 2 && product.images.length > 3 && (
+                  {index === 3 && product.images.length > 4 && (
                     <div
-                      className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center cursor-pointer text-white"
+                      className=" absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center cursor-pointer text-white"
                       onClick={() => setIsModalOpen(true)}
                     >
                       <svg
@@ -190,7 +222,7 @@ function ProductDetail() {
 
             <div className="mt-auto pt-6">
               <p className="text-2xl lg:text-3xl text-primary font-medium mb-4">
-                {product.prices}
+                {formatPrice(product.prices)}
               </p>
               <Button
                 type="primary"
@@ -235,29 +267,11 @@ function ProductDetail() {
 
         <div className="bg-white p-4 lg:p-6">
           <div className="flex flex-col gap-4">
-            <h2 className="font-bold text-xl lg:text-2xl">Thông số kỹ thuật</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full border-collapse border border-gray-200">
-                <tbody>
-                  {product.specifications.map((item, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-4 py-2 border border-gray-200 whitespace-nowrap">
-                        {item.title}
-                      </td>
-                      <td className="px-4 py-2 border border-gray-200">
-                        {item.details}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
             <h2 className="font-bold text-xl lg:text-2xl mt-4">
               Mô tả sản phẩm
             </h2>
             <div
-              className="text-sm lg:text-base font-light prose max-w-none"
+              className="text-sm lg:text-base font-light prose max-w-none whitespace-pre-wrap"
               dangerouslySetInnerHTML={{ __html: product.description }}
             />
             <div className="flex justify-center">
@@ -266,6 +280,41 @@ function ProductDetail() {
                 alt={product.title}
                 className="max-w-full lg:max-w-[600px] h-auto object-contain"
               />
+            </div>
+
+            <h2 className="font-bold text-xl lg:text-2xl">Thông số kỹ thuật</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full border-collapse border border-gray-200">
+                <tbody>
+                  {product.specifications.map((spec, index) => (
+                    <React.Fragment key={index}>
+                      {spec.topic && (
+                        <tr className="bg-primary/5">
+                          <td
+                            colSpan="2"
+                            className="px-4 py-2 border border-gray-200 font-semibold text-xl"
+                          >
+                            {spec.topic}
+                          </td>
+                        </tr>
+                      )}
+                      {spec.details.map((detail, detailIndex) => (
+                        <tr key={detailIndex} className="hover:bg-gray-50">
+                          <td className="px-4 py-2 border border-gray-200 w-1/3 bg-gray-50 font-medium">
+                            {detail.title}
+                          </td>
+                          <td
+                            className="px-4 py-2 border border-gray-200 whitespace-pre-wrap"
+                            dangerouslySetInnerHTML={{
+                              __html: detail.description,
+                            }}
+                          />
+                        </tr>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -370,6 +419,23 @@ function ProductDetail() {
             </Form.Item>
           </Form>
         </Modal>
+
+        <div className="bg-white p-4 lg:p-6">
+          <h2 className="font-bold text-xl lg:text-2xl mb-4">Sản phẩm khác</h2>
+
+          <div className="flex gap-4">
+            <Product
+              category={product.categoryID}
+              brand={product.brandID}
+              limit={10}
+              page={1}
+              itemSize="small"
+              setTotalProducts={() => {}}
+              options={[]}
+              sortType=""
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

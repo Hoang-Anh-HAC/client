@@ -101,7 +101,11 @@ function NavbarAdmin() {
   return (
     <div className="bg-white shadow-md sticky left-0 bottom-0 top-0 z-20 h-[100vh]">
       <div className="w-full justify-center flex py-4">
-        <img src="/public/logo.png" className="w-[70px] h-[70px]" alt="Logo" />
+        <img
+          src="/images/hac-logo/logo-pri.png"
+          className="w-[70px] h-[70px]"
+          alt="Logo"
+        />
       </div>
       <Menu
         onClick={({ key }) => handleMenuClick(key)}

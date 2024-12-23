@@ -31,6 +31,7 @@ import Contact from "./pages/user/Contact";
 
 // Components
 import ProtectedRoute from "./components/admin/layout/ProtectedRoute";
+import ScrollToTop from "./components/user/ScrollToTop";
 
 // Routes Configuration
 const userRoutes = [
@@ -62,6 +63,8 @@ function App() {
 
   return (
     <DataProvider>
+      <ScrollToTop />
+
       <Routes>
         {/* User Routes */}
         <Route path="/" element={<MainLayout />}>

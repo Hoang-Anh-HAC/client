@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Breadcrumb, Spin, Pagination, Button, Tag, Select } from "antd";
 import axios from "../../utils/axiosConfig";
@@ -13,7 +13,6 @@ function ProductList() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(1);
   const [category, setCategory] = useState(null);
@@ -23,77 +22,74 @@ function ProductList() {
   const [selectedSeries, setSelectedSeries] = useState(null);
   const [series, setSeries] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState(null);
-
-  const itemsPerPage = 24;
-
   const [showMobileFilter, setShowMobileFilter] = useState(false);
-
   const [selectedTags, setSelectedTags] = useState([]);
   const [tempSelectedTags, setTempSelectedTags] = useState([]);
-
   const [sortType, setSortType] = useState("default");
 
-  useEffect(() => {
-    const fetchCategory = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`category/${categorySlug}`);
-        setCategory(response.data);
-        setError(null);
-        return response.data;
-      } catch (error) {
-        console.error("Error fetching category:", error);
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategory();
-  }, [categorySlug]);
+  const itemsPerPage = 16;
 
   useEffect(() => {
-    // Reset filter options và tags khi category thay đổi
-    setOptions([]);
-    setSelectedTags([]);
-  }, [categorySlug]);
-
-  useEffect(() => {
-    // Reset brand và series khi category thay đổi
     setSelectedBrand(null);
     setSelectedSeries(null);
     setBrand(null);
-    // Reset trang về 1
     setCurrentPage(1);
+    setOptions([]);
+    setSelectedTags([]);
+    setSortType("default");
   }, [categorySlug]);
 
-  useEffect(() => {
-    const fetchBrand = async () => {
-      if (!brandSlug) return;
+  const fetchCategory = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`category/${categorySlug}`);
+      setCategory(response.data);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching category:", error);
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [categorySlug]);
 
-      try {
-        setLoading(true);
-        const response = await axios.get(`brand/${brandSlug}`);
-        setSelectedBrand(response.data);
-        setBrand(response.data);
-      } catch (error) {
-        console.error("Error fetching brand:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchBrand = useCallback(async (brandSlug) => {
+    if (!brandSlug) return null;
+    try {
+      const response = await axios.get(`brand/${brandSlug}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching brand:", error);
+      return null;
+    }
+  }, []);
 
-    fetchBrand();
-  }, [brandSlug]);
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const handleBrandSelect = (brand) => {
-    setSelectedBrand(brand);
+  const handleBrandSelect = async (brand) => {
     setCurrentPage(1);
+    const fetchedBrand = await fetchBrand(brand.slug);
+    if (fetchedBrand) {
+      setSelectedBrand(fetchedBrand);
+      setBrand(fetchedBrand);
+    }
   };
+
+  useEffect(() => {
+    fetchCategory();
+    if (brandSlug) {
+      fetchBrand(brandSlug).then((fetchedBrand) => {
+        setSelectedBrand(fetchedBrand);
+        setBrand(fetchedBrand);
+      });
+    } else {
+      setSelectedBrand(null);
+    }
+  }, [fetchCategory, brandSlug]);
+
+  useEffect(() => {
+    fetchBrand();
+  }, [fetchBrand]);
+
+  const handlePageChange = (page) => setCurrentPage(page);
 
   const handleSeriesSelect = (series) => {
     setSelectedSeries(series);
@@ -102,13 +98,12 @@ function ProductList() {
 
   const handleOptionClick = (optionID) => {
     setOptions((prevOptions) => {
-      if (prevOptions.includes(optionID)) {
-        return prevOptions.filter((id) => id !== optionID);
-      } else {
-        return [...prevOptions, optionID];
-      }
+      const newOptions = prevOptions.includes(optionID)
+        ? prevOptions.filter((id) => id !== optionID)
+        : [...prevOptions, optionID];
+      setCurrentPage(1);
+      return newOptions;
     });
-    setCurrentPage(1);
   };
 
   const handleFilterChange = (selectedOptions) => {
@@ -350,7 +345,7 @@ function ProductList() {
           <div className="grid grid-cols-2 min-[380px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-2 min-[380px]:gap-3 justify-items-center">
             <Product
               category={category}
-              brand={selectedBrand}
+              selectedBrand={selectedBrand}
               series={selectedSeries}
               page={currentPage}
               limit={itemsPerPage}

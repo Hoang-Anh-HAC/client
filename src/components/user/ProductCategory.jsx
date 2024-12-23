@@ -23,7 +23,7 @@ const ProductCategory = ({
 
   return (
     <div className="justify-between items-center w-full bg-white mt-2 pb-4 shadow ">
-      <div className="flex flex-col sm:flex-row justify-between p-4 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between p-6 gap-4">
         <div className="flex items-center">
           {icon.length > 0 ? (
             <img
@@ -34,7 +34,7 @@ const ProductCategory = ({
           ) : (
             <div className="w-[30px] h-[30px] bg-gray-200 rounded-full" />
           )}
-          <div className="pl-4 text-lg sm:text-xl font-semibold">{title}</div>
+          <div className="pl-4 text-lg sm:text-xl font-medium">{title}</div>
         </div>
 
         <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:space-x-2 justify-start sm:justify-between items-center">

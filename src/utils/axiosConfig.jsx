@@ -5,5 +5,5 @@ import axios from "axios";
 // });
 
 export default axios.create({
-  baseURL: "https://server-orlc.onrender.com/api/",
+  baseURL: "https://server-uz6e.onrender.com/api/",
 });

@@ -180,7 +180,6 @@ const Navbar = () => {
     setSearchValue("");
   };
 
-  if (loading) return <div>Loading categories...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
   const toggleMobileMenu = () => {

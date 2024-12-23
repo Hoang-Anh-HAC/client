@@ -81,6 +81,9 @@ function SearchResult({ searchValue, onClose }) {
                   className="w-16 h-16 object-contain"
                 />
                 <div className="flex-1">
+                  <p className=" text-[12px] sm:text-[14px] font-medium line-clamp-2 text-red-600">
+                    {item.productID}
+                  </p>
                   <h3 className="text-base font-normal text-gray-800">
                     {item.title}
                   </h3>

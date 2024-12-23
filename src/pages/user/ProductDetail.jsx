@@ -13,18 +13,21 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { formatPrice } from "../../utils/helpers";
 import Product from "../../components/user/Product";
+import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
 
 function ProductDetail() {
   const { slug } = useParams();
   const [product, setProduct] = useState(null);
 
   const [mainImage, setMainImage] = useState();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [captchaToken, setCaptchaToken] = useState(null);
   const [verificationAnswer, setVerificationAnswer] = useState("");
+
+  const [totalProducts, setTotalProducts] = useState(1);
 
   const generateQuestion = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -42,52 +45,34 @@ function ProductDetail() {
   const [verification, setVerification] = useState(generateQuestion());
 
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [loadingRelated, setLoadingRelated] = useState(false);
+  const [matchingProducts, setMatchingProducts] = useState([]);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const productRes = await axios.get(`/product/${slug}`);
-        setProduct(productRes.data);
+        const productData = productRes.data;
+
+        setProduct(productData);
+        setRelatedProducts(productData.relatedProducts);
+        setMatchingProducts(productData.matchingProducts);
       } catch (error) {
         console.error("Error fetching data:", error);
         message.error("Không thể tải thông tin sản phẩm.");
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, [slug]);
 
-  useEffect(() => {
-    const fetchRelatedProducts = async () => {
-      if (!product) return;
-
-      setLoadingRelated(true);
-      try {
-        const response = await axios.get("/product", {
-          params: {
-            categoryID: product.categoryID._id,
-            brandID: product.brandID._id,
-            limit: 10,
-            page: 1,
-          },
-        });
-        setRelatedProducts(
-          response.data.products.filter((p) => p._id !== product._id)
-        );
-      } catch (error) {
-        console.error("Lỗi khi tải sản phẩm liên quan:", error);
-      } finally {
-        setLoadingRelated(false);
-      }
-    };
-
-    fetchRelatedProducts();
-  }, [product]);
-
   if (loading)
     return (
       <div className="flex justify-center items-center h-screen">
-        <Spin tip="Đang tải..." />
+        <Spin tip="Đang tải sản phẩm..." />
       </div>
     );
   if (!product) return <p>Sản phẩm không tồn tại.</p>;
@@ -147,26 +132,56 @@ function ProductDetail() {
     }
   };
 
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
+
   return (
     <div className="w-full flex justify-center items-center px-4 lg:px-0">
       <div className="max-w-[1200px] flex flex-col gap-3 w-full">
         <Breadcrumb
           items={[
             { title: <a href="/">Trang Chủ</a> },
-            { title: product.categoryID?.title || "Loading..." },
-            { title: product.brandID?.title || "Loading..." },
+            {
+              title:
+                (
+                  <a href={`/product-list/${product.categoryID?.slug}`}>
+                    {product.categoryID?.title}
+                  </a>
+                ) || "Loading...",
+            },
+            {
+              title:
+                (
+                  <a
+                    href={`/product-list/${product.categoryID?.slug}/${product.brandID?.slug}`}
+                  >
+                    {product.brandID?.title}
+                  </a>
+                ) || "Loading...",
+            },
             { title: product.title || "Loading..." },
           ]}
           className="w-full py-3"
         />
-
         <div className="bg-white p-4 lg:p-6 flex flex-col lg:flex-row gap-6 lg:gap-10">
           <div className="w-full lg:w-[500px] flex flex-col items-center">
-            <Image
-              src={mainImage || product.images[0]?.url || ""}
-              alt={product.title}
-              className="w-full mb-4 object-contain"
-            />
+            {product.images.length ? (
+              <Image
+                src={mainImage || product.images[0]?.url || ""}
+                alt={product.title}
+                className="w-full mb-4 object-contain"
+              />
+            ) : (
+              <div className=" p-4 w-full h-full object-contain transition-transform duration-300 ease-in-out transform group-hover:scale-110 bg-gray-100 rounded flex items-center justify-center">
+                <span className="text-gray-400 text-xs">No image</span>
+              </div>
+            )}
+
             <div className="flex gap-2 flex-wrap">
               {product.images.slice(0, 4).map((image, index) => (
                 <div key={index} className="relative">
@@ -215,7 +230,7 @@ function ProductDetail() {
               <p className="text-sm lg:text-base">
                 Thương hiệu:
                 <span className="text-primary ml-1">
-                  {product.brandID.title || "N/A"}
+                  {product.brandID?.title || "N/A"}
                 </span>
               </p>
             </div>
@@ -265,60 +280,172 @@ function ProductDetail() {
           </div>
         </div>
 
-        <div className="bg-white p-4 lg:p-6">
-          <div className="flex flex-col gap-4">
-            <h2 className="font-bold text-xl lg:text-2xl mt-4">
-              Mô tả sản phẩm
-            </h2>
+        {/* Description */}
+        <div>
+          <div className="flex flex-col lg:flex-row gap-3">
             <div
-              className="text-sm lg:text-base font-light prose max-w-none whitespace-pre-wrap"
-              dangerouslySetInnerHTML={{ __html: product.description }}
-            />
-            <div className="flex justify-center">
-              <img
-                src={product.images?.[0]?.url}
-                alt={product.title}
-                className="max-w-full lg:max-w-[600px] h-auto object-contain"
+              className={`bg-white p-4 ${
+                product.specifications.length > 0 || matchingProducts.length > 0
+                  ? "w-full lg:w-2/3"
+                  : "w-full"
+              }`}
+            >
+              <h2 className="font-medium text-xl lg:text-2xl mb-2">
+                Mô tả sản phẩm
+              </h2>
+              <div
+                className="text-sm lg:text-base font-light prose max-w-none whitespace-pre-wrap"
+                dangerouslySetInnerHTML={{ __html: product.description }}
               />
+              <div className="flex justify-center">
+                {product.images?.[0]?.url && (
+                  <img
+                    src={product.images?.[0]?.url}
+                    alt={product.title}
+                    className="max-w-full lg:max-w-[600px] h-auto object-contain"
+                  />
+                )}
+              </div>
             </div>
 
-            <h2 className="font-bold text-xl lg:text-2xl">Thông số kỹ thuật</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full border-collapse border border-gray-200">
-                <tbody>
-                  {product.specifications.map((spec, index) => (
-                    <React.Fragment key={index}>
-                      {spec.topic && (
-                        <tr className="bg-primary/5">
-                          <td
-                            colSpan="2"
-                            className="px-4 py-2 border border-gray-200 font-semibold text-xl"
-                          >
-                            {spec.topic}
-                          </td>
-                        </tr>
-                      )}
-                      {spec.details.map((detail, detailIndex) => (
-                        <tr key={detailIndex} className="hover:bg-gray-50">
-                          <td className="px-4 py-2 border border-gray-200 w-1/3 bg-gray-50 font-medium">
-                            {detail.title}
-                          </td>
-                          <td
-                            className="px-4 py-2 border border-gray-200 whitespace-pre-wrap"
-                            dangerouslySetInnerHTML={{
-                              __html: detail.description,
-                            }}
-                          />
-                        </tr>
-                      ))}
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
+            <div
+              className={`flex flex-col gap-3  ${
+                product.specifications.length > 0 || matchingProducts.length > 0
+                  ? "w-full lg:w-1/3"
+                  : " "
+              }`}
+            >
+              {product.specifications.length > 0 && (
+                <div className="bg-white p-4">
+                  <h2 className="font-medium text-xl lg:text-2xl mb-2">
+                    Thông số kỹ thuật
+                  </h2>
+                  <div className="overflow-y-hidden max-h-[350px] relative min-w-full">
+                    <table className="min-w-full border-collapse border border-gray-200">
+                      <tbody>
+                        {product.specifications.map((spec, index) => (
+                          <React.Fragment key={index}>
+                            {spec.topic && (
+                              <tr className="bg-primary/5">
+                                <td
+                                  colSpan="2"
+                                  className="px-4 py-2 border border-gray-200 font-semibold text-xl"
+                                >
+                                  {spec.topic}
+                                </td>
+                              </tr>
+                            )}
+                            {spec.details.map((detail, detailIndex) => (
+                              <tr
+                                key={detailIndex}
+                                className="hover:bg-gray-50"
+                              >
+                                <td className="px-4 py-2 border border-gray-200 w-1/3 bg-gray-50 font-medium">
+                                  {detail.title}
+                                </td>
+                                <td
+                                  className="px-4 py-2 border border-gray-200 whitespace-pre-wrap"
+                                  dangerouslySetInnerHTML={{
+                                    __html: detail.description,
+                                  }}
+                                />
+                              </tr>
+                            ))}
+                          </React.Fragment>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent" />
+                  </div>
+                  <Button
+                    className="left-1/2 transform -translate-x-1/2 z-10 w-full"
+                    onClick={showModal}
+                  >
+                    Hiển thị thêm
+                  </Button>
+                </div>
+              )}
+
+              {matchingProducts.length > 0 && (
+                <div className="bg-white p-4 ">
+                  <h2 className="font-medium text-xl lg:text-2xl mb-4">
+                    Sản phẩm phù hợp
+                  </h2>
+                  <div className="max-h-[500px] overflow-y-auto px-2">
+                    <div className="flex flex-col gap-2 ">
+                      <Product
+                        relatedProducts={matchingProducts}
+                        setTotalProducts={setTotalProducts}
+                        layoutType="horizontal"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
+        {/* Recommend */}
+        {relatedProducts && relatedProducts.length > 0 && (
+          <div className="bg-white p-4 lg:p-6">
+            <h2 className="font-medium text-xl lg:text-2xl mb-4">
+              Sản phẩm liên quan
+            </h2>
+
+            <div className="flex flex-col">
+              <div className="grid grid-cols-4 gap-4">
+                <Product
+                  relatedProducts={relatedProducts}
+                  setTotalProducts={setTotalProducts}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Pop up */}
+        <Modal
+          title="Thông số kỹ thuật đầy đủ"
+          open={isModalVisible}
+          onCancel={handleCancel}
+          footer={null}
+          width={800}
+        >
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse border border-gray-200">
+              <tbody>
+                {product.specifications.map((spec, index) => (
+                  <React.Fragment key={index}>
+                    {spec.topic && (
+                      <tr className="bg-primary/5">
+                        <td
+                          colSpan="2"
+                          className="px-4 py-2 border border-gray-200 font-semibold text-xl"
+                        >
+                          {spec.topic}
+                        </td>
+                      </tr>
+                    )}
+                    {spec.details.map((detail, detailIndex) => (
+                      <tr key={detailIndex} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 border border-gray-200 w-1/3 bg-gray-50 font-medium">
+                          {detail.title}
+                        </td>
+                        <td
+                          className="px-4 py-2 border border-gray-200 whitespace-pre-wrap"
+                          dangerouslySetInnerHTML={{
+                            __html: detail.description,
+                          }}
+                        />
+                      </tr>
+                    ))}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Modal>
         <Modal
           title="Thư viện hình ảnh sản phẩm"
           open={isModalOpen}
@@ -342,7 +469,6 @@ function ProductDetail() {
             ))}
           </div>
         </Modal>
-
         <Modal
           title={`Yêu cầu giá tốt sản phẩm ${product.productID}`}
           open={isContactModalOpen}
@@ -393,11 +519,20 @@ function ProductDetail() {
 
             <Form.Item label={verification.question}>
               <div className="space-y-2">
-                <div
-                  className="bg-gray-100 p-2 text-center text-xl font-mono tracking-wider select-none"
-                  style={{ userSelect: "none", WebkitUserSelect: "none" }}
-                >
-                  {verification.display}
+                <div className="flex items-center">
+                  <span
+                    className="bg-gray-100 p-2 text-center text-xl font-mono tracking-wider select-none w-full"
+                    style={{ userSelect: "none" }}
+                  >
+                    {verification.display}
+                  </span>
+                  <Button
+                    type="text"
+                    className="ml-2"
+                    onClick={() => setVerification(generateQuestion())}
+                  >
+                    Tạo lại mã
+                  </Button>
                 </div>
                 <Input
                   placeholder="Nhập mã xác nhận"
@@ -419,23 +554,6 @@ function ProductDetail() {
             </Form.Item>
           </Form>
         </Modal>
-
-        <div className="bg-white p-4 lg:p-6">
-          <h2 className="font-bold text-xl lg:text-2xl mb-4">Sản phẩm khác</h2>
-
-          <div className="flex gap-4">
-            <Product
-              category={product.categoryID}
-              brand={product.brandID}
-              limit={10}
-              page={1}
-              itemSize="small"
-              setTotalProducts={() => {}}
-              options={[]}
-              sortType=""
-            />
-          </div>
-        </div>
       </div>
     </div>
   );

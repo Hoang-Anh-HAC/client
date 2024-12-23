@@ -45,20 +45,23 @@ const ProductBrandFilter = ({
     const selectedBrand = brands.find(
       (brand) => brand.slug === selectedBrandSlug
     );
-    onSelectBrand(selectedBrand);
-    setSelectedSeries(null);
+    if (selectedBrand) {
+      onSelectBrand(selectedBrand);
+      setSelectedSeries(null);
 
-    const newPath = selectedBrandSlug
-      ? `/product-list/${categorySlug}/${selectedBrandSlug}`
-      : `/product-list/${categorySlug}`;
+      const newPath = selectedBrandSlug
+        ? `/product-list/${categorySlug}/${selectedBrandSlug}`
+        : `/product-list/${categorySlug}`;
 
-    navigate(newPath);
+      navigate(newPath);
+    }
   };
 
   const handleRemoveBrandSelected = () => {
     navigate(`/product-list/${categorySlug}`);
     onSelectBrand(null);
     setSelectedSeries(null);
+    fetchProducts(); // Gọi lại fetch sản phẩm
   };
 
   if (loading) {

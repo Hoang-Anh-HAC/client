@@ -5,7 +5,7 @@ const BrandCategory = ({ category, onMouseLeave, onSelectBrand }) => {
   const navigate = useNavigate();
 
   const handleBrandClick = (brand) => {
-    onSelectBrand?.(brand.slug);
+    onSelectBrand(brand.slug);
   };
 
   return (

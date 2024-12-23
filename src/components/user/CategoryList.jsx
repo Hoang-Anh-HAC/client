@@ -3,9 +3,10 @@ import CategoryItems from "./CategoryItems";
 import BrandCategory from "./BrandCategory";
 import { useData } from "../../contexts/DataContext";
 import { useNavigate } from "react-router-dom";
+import { Spin } from "antd";
 
 const CategoryList = ({ onClose }) => {
-  const { categories } = useData();
+  const { categories, loading } = useData();
   const navigate = useNavigate();
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -34,7 +35,10 @@ const CategoryList = ({ onClose }) => {
       onClick={(e) => e.stopPropagation()}
     >
       <h2 className="pt-4 pb-2 px-4 font-semibold">Danh mục sản phẩm</h2>
-      {categories &&
+      {loading ? (
+        <Spin />
+      ) : (
+        categories &&
         categories.length > 0 &&
         categories.map((category) => (
           <CategoryItems
@@ -43,7 +47,8 @@ const CategoryList = ({ onClose }) => {
             onMouseEnter={() => handleMouseEnter(category)}
             onClick={handleCategoryClick}
           />
-        ))}
+        ))
+      )}
 
       {hoveredCategory && window.innerWidth > 768 && (
         <div className="absolute top-0 left-[305px] z-20">

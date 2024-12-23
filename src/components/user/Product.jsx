@@ -7,15 +7,15 @@ import { InboxOutlined } from "@ant-design/icons";
 
 const Product = ({
   category,
-  brand,
   series,
-  itemSize,
   page,
   limit,
   setTotalProducts,
   options,
-  onViewAllImages,
   sortType,
+  selectedBrand,
+  relatedProducts,
+  layoutType,
 }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,48 +27,40 @@ const Product = ({
       setLoading(true);
       setError(null);
 
-      if (!category?._id) {
-        setLoading(false);
-        setTotalProducts(0);
-        return;
-      }
-
       try {
         const queryParams = new URLSearchParams();
+        if (category) {
+          queryParams.append("categoryID", category._id);
+        }
 
-        queryParams.append("categoryID", category._id);
+        if (Array.isArray(relatedProducts) && relatedProducts.length > 0) {
+          relatedProducts.forEach((productID) =>
+            queryParams.append("productID", productID)
+          );
+        }
 
-        if (brand?._id) {
-          queryParams.append("brandID", brand._id);
+        if (selectedBrand?._id) {
+          queryParams.append("brandID", selectedBrand._id);
         }
 
         if (series) {
           queryParams.append("seriesID", series);
         }
-
         if (options?.length > 0) {
-          queryParams.append("optionIDs", options.toString());
+          queryParams.append("optionIDs", options);
         }
-
         queryParams.append("page", page);
         queryParams.append("limit", limit);
         queryParams.append("sort", sortType);
 
         const response = await axios.get(`/product?${queryParams.toString()}`);
-
-        console.log(queryParams.toString());
-
         if (response.data?.products?.length === 0) {
           setError("Không có sản phẩm trong danh mục này.");
           setProducts([]);
           setTotalProducts(0);
-        } else if (response.data?.products) {
+        } else {
           setProducts(response.data.products);
           setTotalProducts(response.data.totalProducts);
-        } else {
-          setError("Đã xảy ra lỗi khi tải sản phẩm.");
-          setProducts([]);
-          setTotalProducts(0);
         }
       } catch (error) {
         if (error.response && error.response.status === 404) {
@@ -85,7 +77,16 @@ const Product = ({
     };
 
     fetchProducts();
-  }, [category?._id, brand?._id, series, page, limit, options, sortType]);
+  }, [
+    category,
+    selectedBrand,
+    series,
+    options,
+    relatedProducts,
+    page,
+    limit,
+    sortType,
+  ]);
 
   const handleProductClick = async (product) => {
     try {
@@ -126,32 +127,56 @@ const Product = ({
         products.map((product) => (
           <div
             key={product._id}
-            className="border-[1px] border-gray-300 rounded-sm flex flex-col h-[220px] min-[380px]:h-[280px] xs:h-[300px] sm:h-[350px] w-full max-w-[180px] min-[380px]:max-w-[200px] xs:max-w-[220px] sm:max-w-full hover:border-grey  cursor-pointer overflow-hidden group"
+            className={`border-[1px] border-gray-300 rounded-sm flex ${
+              layoutType === "horizontal"
+                ? "flex-row items-center gap-2 p-2 sm:p-3 w-full max-w-[400px]"
+                : "flex-col "
+            } h-auto hover:border-grey cursor-pointer overflow-hidden group`}
             onClick={() => handleProductClick(product)}
           >
-            <div className="flex items-center justify-center bg-gray-100 relative h-[130px] min-[380px]:h-[160px] xs:h-[180px] sm:h-[220px] w-full overflow-hidden min-[380px]:p-2 xs:p-3">
-              <Image
-                src={product.images?.[0]?.url || "/placeholder-image.png"}
-                alt={product.title}
-                className="p-6 w-full h-full object-contain transition-transform duration-300 ease-in-out transform group-hover:scale-110"
-                preview={false}
-              />
+            {/* Image Section */}
+            <div
+              className={`flex items-center justify-center bg-gray-100 relative ${
+                layoutType === "horizontal"
+                  ? "h-[80px] w-[80px] sm:h-[100px] sm:w-[100px]"
+                  : "h-[130px] min-[380px]:h-[160px] xs:h-[180px] sm:h-[220px] w-full"
+              } overflow-hidden`}
+            >
+              {product.images.length ? (
+                <Image
+                  src={product.images?.[0]?.url || "/placeholder-image.png"}
+                  alt={product.title}
+                  className="p-4 w-full h-full object-contain transition-transform duration-300 ease-in-out transform group-hover:scale-110"
+                  preview={false}
+                />
+              ) : (
+                <div className=" p-4 w-full h-full object-contain transition-transform duration-300 ease-in-out transform group-hover:scale-110 bg-gray-100 rounded flex items-center justify-center">
+                  <span className="text-gray-400 text-xs">No image</span>
+                </div>
+              )}
             </div>
 
-            <div className="flex flex-col justify-between h-[90px] min-[380px]:h-[120px] xs:h-[120px] p-2 min-[380px]:p-3 xs:p-4 relative">
-              <p className="text-[16px] min-[380px]:text-[14px] xs:text-base font-medium   line-clamp-2 text-red-600">
+            {/* Info Section */}
+            <div
+              className={`flex flex-col justify-between ${
+                layoutType === "horizontal"
+                  ? "flex-1"
+                  : "p-2 min-[380px]:p-3 xs:p-4"
+              } relative`}
+            >
+              <p className="text-[12px] sm:text-[14px] font-medium line-clamp-2 text-red-600">
                 {product.productID}
               </p>
-              <p className="text-[16px] min-[380px]:text-[14px] xs:text-base font-normal line-clamp-2">
+              <p className="text-[14px] sm:text-[16px] font-normal line-clamp-2">
                 {product.title}
               </p>
-
               <div>
-                <p className="text-[20px] min-[380px]:text-[19px] xs:text-xl font-semibold text-primary xs:mb-2">
+                <p className="text-[16px] sm:text-[18px] font-semibold text-primary">
                   {formatPrice(product.prices)}
                 </p>
               </div>
 
+              {/* Hover Arrow */}
               <div className="absolute bottom-2 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -159,7 +184,9 @@ const Product = ({
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="size-4"
+                  className={`${
+                    layoutType === "horizontal" ? "w-5 h-5" : "size-4"
+                  } text-gray-600`}
                 >
                   <path
                     strokeLinecap="round"

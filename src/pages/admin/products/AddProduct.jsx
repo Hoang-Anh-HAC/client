@@ -39,6 +39,7 @@ function AddProduct() {
     brandID: "",
     seriesID: "",
     relatedProducts: [],
+    matchingProducts: [],
     optionIDs: [],
     specifications: [
       {
@@ -78,6 +79,23 @@ function AddProduct() {
     setProduct((prev) => ({
       ...prev,
       relatedProducts: prev.relatedProducts.filter((id) => id !== productID), // Loại bỏ sản phẩm khỏi danh sách
+    }));
+  };
+
+  const handleAddMatchingProduct = (productID) => {
+    if (!productID.trim() || product.matchingProducts.includes(productID))
+      return message.error("Đã có mã này");
+    setProduct((prev) => ({
+      ...prev,
+      matchingProducts: [...prev.matchingProducts, productID], // Thêm sản phẩm vào danh sách
+    }));
+    setInputProductID(""); // Reset input
+  };
+
+  const handleRemoveMatchingProduct = (productID) => {
+    setProduct((prev) => ({
+      ...prev,
+      matchingProducts: prev.matchingProducts.filter((id) => id !== productID), // Loại bỏ sản phẩm khỏi danh sách
     }));
   };
 
@@ -165,7 +183,6 @@ function AddProduct() {
       "title",
       "productID",
       "categoryID",
-      "brandID",
       "prices",
       "quantity",
       "description",
@@ -788,6 +805,59 @@ function AddProduct() {
                               <button
                                 onClick={() =>
                                   handleRemoveRelatedProduct(productID)
+                                }
+                                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                              >
+                                Xóa
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ),
+                },
+                {
+                  label: "Sản phẩm phù hợp",
+                  key: "matchingProducts",
+                  children: (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block mb-2 font-medium">
+                          Nhập Product ID:
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Nhập Product ID"
+                            value={inputProductID}
+                            onChange={(e) => setInputProductID(e.target.value)}
+                            className="border rounded px-3 py-2 w-full"
+                          />
+                          <button
+                            onClick={() =>
+                              handleAddMatchingProduct(inputProductID)
+                            }
+                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                          >
+                            Thêm
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-medium mb-2">
+                          Danh sách sản phẩm phù hợp:
+                        </h3>
+                        <ul className="space-y-2">
+                          {product.matchingProducts.map((productID) => (
+                            <li
+                              key={productID}
+                              className="border rounded px-3 py-2 flex justify-between items-center"
+                            >
+                              <span>{productID}</span>
+                              <button
+                                onClick={() =>
+                                  handleRemoveMatchingProduct(productID)
                                 }
                                 className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                               >

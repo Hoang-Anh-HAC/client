@@ -372,6 +372,41 @@ function EditProduct() {
     // Lưu sản phẩm ngay lập tức
   };
 
+  const [inputMatchingProductID, setInputMatchingProductID] = useState("");
+
+  // Thêm state để lưu trữ sản phẩm khớp
+  const handleAddMatchingProduct = (productID) => {
+    if (!productID.trim() || product.matchingProducts.includes(productID))
+      return message.error("Đã có mã này");
+
+    // Cập nhật sản phẩm khớp
+    setProduct((prev) => ({
+      ...prev,
+      matchingProducts: [...prev.matchingProducts, productID], // Thêm sản phẩm vào danh sách
+    }));
+
+    // Lưu sản phẩm ngay lập tức
+
+    setIsEditing(true); // Đảm bảo nút lưu hoạt động
+
+    setInputMatchingProductID(""); // Reset input
+  };
+
+  const handleRemoveMatchingProduct = (productID) => {
+    setProduct((prev) => {
+      const updatedMatchingProducts = prev.matchingProducts.filter(
+        (id) => id !== productID
+      ); // Loại bỏ sản phẩm khỏi danh sách
+      return {
+        ...prev,
+        matchingProducts: updatedMatchingProducts,
+      };
+    });
+    setIsEditing(true); // Đảm bảo nút lưu hoạt động
+
+    // Lưu sản phẩm ngay lập tức
+  };
+
   return (
     <Spin spinning={isPageLoading} tip="Đang tải...">
       <div className="max-w-7xl mx-auto p-6">
@@ -775,6 +810,58 @@ function EditProduct() {
                           <button
                             onClick={() =>
                               handleRemoveRelatedProduct(productID)
+                            }
+                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-200"
+                          >
+                            Xóa
+                          </button>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              </Card>
+
+              {/* Matching Products Section */}
+              <Card title="Sản Phẩm Phù Hợp" className="mb-6">
+                <div>
+                  <label className="block mb-2 font-medium">
+                    Nhập Product ID:
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Nhập Product ID"
+                      value={inputMatchingProductID}
+                      onChange={(e) =>
+                        setInputMatchingProductID(e.target.value)
+                      }
+                      className="border rounded px-3 py-2 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={() =>
+                        handleAddMatchingProduct(inputMatchingProductID)
+                      }
+                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200"
+                    >
+                      Thêm
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <h3 className="font-medium mb-2">
+                    Danh sách sản phẩm phù hợp:
+                  </h3>
+                  <ul className="space-y-2">
+                    {Array.isArray(product.matchingProducts) &&
+                      product.matchingProducts.map((productID) => (
+                        <li
+                          key={productID}
+                          className="border rounded px-3 py-2 flex justify-between items-center bg-gray-100 hover:bg-gray-200 transition duration-200"
+                        >
+                          <span className="text-gray-800">{productID}</span>
+                          <button
+                            onClick={() =>
+                              handleRemoveMatchingProduct(productID)
                             }
                             className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-200"
                           >

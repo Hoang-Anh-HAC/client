@@ -231,6 +231,19 @@ function ManageProduct() {
               ))}
             </Select>
           </div>
+          <div className="mt-4 flex justify-center">
+            <Pagination
+              current={currentPage}
+              total={totalProducts}
+              pageSize={itemsPerPage}
+              onChange={(page) => setCurrentPage(page)}
+              showSizeChanger={false}
+              showTotal={(total, range) =>
+                `${range[0]}-${range[1]} của ${total} sản phẩm`
+              }
+              className="text-sm"
+            />
+          </div>
         </Card>
 
         <Card className="shadow-sm">

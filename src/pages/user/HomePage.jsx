@@ -402,7 +402,7 @@ const HomePage = () => {
             <h1 className="text-xl md:text-2xl font-bold text-primary text-center hidden md:block">
               Chúng Tôi Giúp Bạn Dễ Dàng Mua Sắm Thiết Bị CNTT
             </h1>
-            <p className="text-xs md:text-sm text-center text-gray-700 hidden md:block">
+            <p className="text-xs md:text-base text-center text-gray-700 hidden md:block">
               Chúng tôi là Hoàng Anh Technology, công ty cung cấp phần cứng và
               giải pháp cho doanh nghiệp của bạn, từ giai đoạn khởi đầu đến mở
               rộng.

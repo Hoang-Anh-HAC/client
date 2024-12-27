@@ -176,7 +176,7 @@ const Product = ({
               </p>
               <div>
                 <p className="text-[16px] sm:text-[18px] font-semibold text-primary">
-                  {formatPrice(product.prices)}
+                  Liên hệ
                 </p>
               </div>
 

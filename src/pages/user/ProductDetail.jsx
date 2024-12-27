@@ -237,7 +237,7 @@ function ProductDetail() {
 
             <div className="mt-auto pt-6">
               <p className="text-2xl lg:text-3xl text-primary font-medium mb-4">
-                {formatPrice(product.prices)}
+                Liên hệ
               </p>
               <Button
                 type="primary"

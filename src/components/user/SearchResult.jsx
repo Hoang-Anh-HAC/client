@@ -87,9 +87,7 @@ function SearchResult({ searchValue, onClose }) {
                   <h3 className="text-base font-normal text-gray-800">
                     {item.title}
                   </h3>
-                  <p className="text-primary font-bold text-medium">
-                    {formatPrice(item.prices)}
-                  </p>
+                  <p className="text-primary font-bold text-medium">Liên hệ</p>
                 </div>
               </Link>
             ))}

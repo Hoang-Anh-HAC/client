@@ -30,8 +30,8 @@ const footerItems = [
         link: "https://maps.app.goo.gl/bFiENRyY6cftbT5v6",
       },
       `Điện thoại: (028) 399 70 399`,
-      `Hotline: 0908 30 13 13 (Mr. Trung Trần) & 0902 438 800 (Mr. Trung Nguyễn)`,
-      `Email: trungtran@hac.com.vn hoặc trungnguyen@hac.com.vn`,
+      `Hotline: 0908 30 13 13 (Mr. Trung Trần)`,
+      `Email: trungtran@hac.com.vn`,
     ],
   },
 ];

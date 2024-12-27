@@ -11,7 +11,7 @@ function MainLayout() {
   return (
     <div className="w-full bg-secondary overflow-x-hidden">
       <Navbar />
-      <div className="w-full pt-[100px] sm:pt-[130px] md:pt-[135px] lg:pt-[150px]">
+      <div className="w-full pt-[125px] sm:pt-[145px] md:pt-[155px] lg:pt-[175px]">
         <Outlet />
       </div>
       <Footer />

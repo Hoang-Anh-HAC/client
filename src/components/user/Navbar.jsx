@@ -6,7 +6,12 @@ import {
   AppstoreOutlined,
   MailOutlined,
   SettingOutlined,
+  LeftOutlined,
+  RightOutlined,
 } from "@ant-design/icons";
+
+import { Carousel } from "antd";
+
 import useCategories from "../../hooks/useCategories";
 import { useData } from "../../contexts/DataContext";
 import SearchResult from "./SearchResult";
@@ -131,6 +136,7 @@ const Navbar = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [showSearchResult, setShowSearchResult] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const searchContainerRef = useRef(null);
 
@@ -185,9 +191,41 @@ const Navbar = () => {
   const toggleMobileMenu = () => {
     setShowMobileMenu(!showMobileMenu);
   };
-
+  const contentStyle = {
+    margin: 0,
+    height: "30px",
+    color: "#fff",
+    lineHeight: "30px",
+    textAlign: "center",
+    background: "#364d79",
+  };
   return (
     <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
+      <>
+        <Carousel
+          arrows
+          infinite={true}
+          dots={false}
+          autoplay
+          autoplaySpeed={3000}
+        >
+          <div>
+            <h3 style={contentStyle}>Freeship Nội Thành TP.HCM</h3>
+          </div>
+          <div>
+            <h3 style={contentStyle}>
+              Địa chỉ: 74/28 Trương Quốc Dung, Phường 10, Quận Phú Nhuận, Tp.
+              HCM
+            </h3>
+          </div>
+          <div>
+            <h3 style={contentStyle}>Liên Hệ: 028 399 70 399</h3>
+          </div>
+          <div>
+            <h3 style={contentStyle}>Email: trungtran@hac.com.vn</h3>
+          </div>
+        </Carousel>
+      </>
       <div className="max-w-[1200px] mx-auto px-2 sm:px-4">
         <ul className="flex items-center justify-between py-2 sm:py-3 gap-4 xl:gap-6">
           <li className="xl:hidden">
@@ -248,7 +286,7 @@ const Navbar = () => {
 
           {/* Desktop CategoryList */}
           {showCategoryList && (
-            <div className="absolute top-[160px] hidden xl:block">
+            <div className="absolute top-[185px] hidden xl:block -ml-4 ">
               <div
                 className="fixed top-0 left-0 right-0 bottom-0 bg-black transition-opacity duration-300 ease-in-out"
                 style={{

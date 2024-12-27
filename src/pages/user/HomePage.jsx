@@ -109,7 +109,7 @@ const HomePage = () => {
 
       <div className="flex pt-[10px] justify-center w-full px-2 sm:px-4">
         <div className="flex flex-col xl:flex-row max-w-[1200px] w-full gap-2">
-          <div className="relative bg-white w-full xl:w-[300px] hidden xl:block shadow">
+          <div className="relative bg-primary w-full xl:w-[300px] hidden xl:block shadow">
             <CategoryList />
           </div>
 

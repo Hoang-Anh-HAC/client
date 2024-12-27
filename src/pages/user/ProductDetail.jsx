@@ -13,7 +13,7 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { formatPrice } from "../../utils/helpers";
 import Product from "../../components/user/Product";
-import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
 function ProductDetail() {
   const { slug } = useParams();
@@ -382,28 +382,69 @@ function ProductDetail() {
                   </div>
                 </div>
               )}
+
+              {relatedProducts.length > 0 && (
+                <div className="bg-white p-4 ">
+                  <h2 className="font-medium text-xl lg:text-2xl mb-4">
+                    Sản phẩm liên quan
+                  </h2>
+                  <div className="max-h-[500px] overflow-y-auto px-2">
+                    <div className="flex flex-col gap-2 ">
+                      <Product
+                        relatedProducts={relatedProducts}
+                        setTotalProducts={setTotalProducts}
+                        layoutType="horizontal"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Recommend */}
-        {relatedProducts && relatedProducts.length > 0 && (
+        {product.seriesID?._id && (
           <div className="bg-white p-4 lg:p-6">
             <h2 className="font-medium text-xl lg:text-2xl mb-4">
-              Sản phẩm liên quan
+              Sản phẩm cùng dòng
             </h2>
-
-            <div className="flex flex-col">
-              <div className="grid grid-cols-4 gap-4">
+            <div className="relative flex flex-col overflow-x-auto">
+              <button
+                className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 hover:bg-gray-200 hover:scale-105 transition-transform duration-300"
+                onClick={() => {
+                  // Logic để cuộn sang trái
+                  document
+                    .getElementById("product-series")
+                    .scrollBy({ left: -400, behavior: "smooth" });
+                }}
+              >
+                <LeftOutlined className="text-lg" />
+              </button>
+              <div
+                id="product-series"
+                className="grid grid-flow-col auto-cols-max gap-4 overflow-x-hidden"
+              >
                 <Product
-                  relatedProducts={relatedProducts}
+                  series={product.seriesID._id}
                   setTotalProducts={setTotalProducts}
+                  recentProduct={product._id}
                 />
               </div>
+              <button
+                className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 hover:bg-gray-200 hover:scale-105 transition-transform duration-300"
+                onClick={() => {
+                  // Logic để cuộn sang phải
+                  document
+                    .getElementById("product-series")
+                    .scrollBy({ left: 400, behavior: "smooth" });
+                }}
+              >
+                <RightOutlined className="text-lg" />
+              </button>
             </div>
           </div>
         )}
-
         {/* Pop up */}
         <Modal
           title="Thông số kỹ thuật đầy đủ"

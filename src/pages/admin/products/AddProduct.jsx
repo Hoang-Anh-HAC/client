@@ -66,11 +66,13 @@ function AddProduct() {
   const [inputProductID, setInputProductID] = useState("");
 
   const handleAddRelatedProduct = (productID) => {
-    if (!productID.trim() || product.relatedProducts.includes(productID))
+    const trimmedProductID = productID.trim(); // Loại bỏ khoảng trắng
+
+    if (!productID.trim() || product.relatedProducts.includes(trimmedProductID))
       return message.error("Đã có mã này");
     setProduct((prev) => ({
       ...prev,
-      relatedProducts: [...prev.relatedProducts, productID], // Thêm sản phẩm vào danh sách
+      relatedProducts: [...prev.relatedProducts, trimmedProductID], // Thêm sản phẩm vào danh sách
     }));
     setInputProductID(""); // Reset input
   };
@@ -83,11 +85,16 @@ function AddProduct() {
   };
 
   const handleAddMatchingProduct = (productID) => {
-    if (!productID.trim() || product.matchingProducts.includes(productID))
+    const trimmedProductID = productID.trim(); // Loại bỏ khoảng trắng
+
+    if (
+      !productID.trim() ||
+      product.matchingProducts.includes(trimmedProductID)
+    )
       return message.error("Đã có mã này");
     setProduct((prev) => ({
       ...prev,
-      matchingProducts: [...prev.matchingProducts, productID], // Thêm sản phẩm vào danh sách
+      matchingProducts: [...prev.matchingProducts, trimmedProductID], // Thêm sản phẩm vào danh sách
     }));
     setInputProductID(""); // Reset input
   };

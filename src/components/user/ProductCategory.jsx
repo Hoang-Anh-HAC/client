@@ -58,9 +58,9 @@ const ProductCategory = ({
       </div>
 
       {/* Mobile: Horizontal scroll */}
-      <div className="sm:hidden overflow-x-auto scrollbar-hide px-2">
-        <div className="flex gap-4 pb-2" style={{ width: "max-content" }}>
-          <div className="grid grid-flow-col auto-cols-[200px] ">
+      <div className="sm:hidden overflow-x-auto scrollbar-hide px-2 w-full">
+        <div className="flex gap-4 pb-2">
+          <div className="grid grid-flow-col auto-cols-[200px] gap-2">
             <Product
               category={category}
               brand={brand}

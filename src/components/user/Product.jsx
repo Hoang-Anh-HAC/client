@@ -16,6 +16,7 @@ const Product = ({
   selectedBrand,
   relatedProducts,
   layoutType,
+  recentProduct,
 }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,12 +55,20 @@ const Product = ({
         queryParams.append("sort", sortType);
 
         const response = await axios.get(`/product?${queryParams.toString()}`);
+
+        console.log(response.data);
         if (response.data?.products?.length === 0) {
           setError("Không có sản phẩm trong danh mục này.");
           setProducts([]);
           setTotalProducts(0);
+          return;
         } else {
-          setProducts(response.data.products);
+          let filteredProducts = recentProduct
+            ? response.data.products.filter(
+                (product) => product._id !== recentProduct
+              )
+            : response.data.products;
+          setProducts(filteredProducts);
           setTotalProducts(response.data.totalProducts);
         }
       } catch (error) {
@@ -69,7 +78,7 @@ const Product = ({
           console.error("Error fetching products:", error);
           setError("Đã xảy ra lỗi khi tải sản phẩm.");
         }
-        setProducts([]);
+        setProducts();
         setTotalProducts(0);
       } finally {
         setLoading(false);
@@ -118,19 +127,14 @@ const Product = ({
 
   return (
     <>
-      {products.length === 0 ? (
-        <div className="col-span-full flex flex-col items-center justify-center min-h-[300px]">
-          <InboxOutlined className="text-4xl text-gray-400 mb-4" />
-          <h3 className="text-lg text-gray-600">Sản phẩm đang cập nhật</h3>
-        </div>
-      ) : (
+      {products &&
         products.map((product) => (
           <div
             key={product._id}
             className={`border-[1px] border-gray-300 rounded-sm flex ${
               layoutType === "horizontal"
-                ? "flex-row items-center gap-2 p-2 sm:p-3 w-full max-w-[400px]"
-                : "flex-col "
+                ? "flex-row items-center gap-2 p-2 sm:p-3 w-full max-w-[500px]"
+                : "flex-col max-w-[250px]"
             } h-auto hover:border-grey cursor-pointer overflow-hidden group`}
             onClick={() => handleProductClick(product)}
           >
@@ -197,8 +201,7 @@ const Product = ({
               </div>
             </div>
           </div>
-        ))
-      )}
+        ))}
     </>
   );
 };

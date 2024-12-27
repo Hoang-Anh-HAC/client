@@ -1,7 +1,8 @@
 import React from "react";
 import { Footer } from "antd/es/layout/layout";
 import { Button } from "antd";
-
+import { useData } from "../../contexts/DataContext";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 const footerItems = [
   {
     title: "VỀ HAC",
@@ -36,6 +37,8 @@ const footerItems = [
 ];
 
 function FooterLayout() {
+  const { categories } = useData();
+
   return (
     <Footer className="mt-3 bg-white">
       <div className="max-w-[1200px] w-full mx-auto px-4">

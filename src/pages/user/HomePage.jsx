@@ -148,9 +148,9 @@ const HomePage = () => {
         </div>
       </div>
 
-      <div className="flex justify-center px-4">
-        <div className="w-full max-w-[1200px]">
-          <div className="grid grid-cols-1 ">
+      <div className="justify-center items-center flex flex-col">
+        <div className="w-full  max-w-[1200px]">
+          <div className="grid grid-cols-1  ">
             {categories.map((category) => (
               <ProductCategory
                 category={category}
@@ -168,35 +168,26 @@ const HomePage = () => {
                   Đối Tác Của Chúng Tôi
                 </span>
               </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
-                <div className="group relative overflow-hidden rounded-lg p-4 hover:shadow-lg transition-all duration-300">
-                  <img
-                    src="/images/partners/logo-cisco.png"
-                    alt="Cisco"
-                    className="h-16 w-auto object-contain mx-auto filter grayscale group-hover:grayscale-0 transition-all duration-300 transform group-hover:scale-110"
-                  />
-                </div>
-                <div className="group relative overflow-hidden rounded-lg p-4 hover:shadow-lg transition-all duration-300">
-                  <img
-                    src="/images/partners/logo-aruba.png"
-                    alt="Aruba"
-                    className="h-16 w-auto object-contain mx-auto filter grayscale group-hover:grayscale-0 transition-all duration-300 transform group-hover:scale-110"
-                  />
-                </div>
-                <div className="group relative overflow-hidden rounded-lg p-4 hover:shadow-lg transition-all duration-300">
-                  <img
-                    src="/images/partners/logo-hpe.png"
-                    alt="HP"
-                    className="h-16 w-auto object-contain mx-auto filter grayscale group-hover:grayscale-0 transition-all duration-300 transform group-hover:scale-110"
-                  />
-                </div>
-                <div className="group relative overflow-hidden rounded-lg p-4 hover:shadow-lg transition-all duration-300">
-                  <img
-                    src="/images/partners/logo-dell.png"
-                    alt="Dell"
-                    className="h-16 w-auto object-contain mx-auto filter grayscale group-hover:grayscale-0 transition-all duration-300 transform group-hover:scale-110"
-                  />
-                </div>
+              <div className="grid grid-cols-2 sm:grid-cols-6 gap-8">
+                {[
+                  "/images/partners/logo-cisco.png",
+                  "/images/partners/logo-aruba.png",
+                  "/images/partners/logo-hpe.png",
+                  "/images/partners/logo-dell.png",
+                  "/images/partners/logo-h3c.png",
+                  "/images/partners/logo-lenovo.png",
+                ].map((src, index) => (
+                  <div
+                    key={index}
+                    className="group relative overflow-hidden rounded-lg p-4 hover:shadow-lg transition-all duration-300"
+                  >
+                    <img
+                      src={src}
+                      alt={`Partner ${index + 1}`}
+                      className="h-16 w-auto object-contain mx-auto filter grayscale group-hover:grayscale-0 transition-all duration-300 transform group-hover:scale-110"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -398,6 +389,34 @@ const HomePage = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+        <div className="w-full pt-2 relative">
+          <img
+            src="/images/banner/home-banner-2.png"
+            className="w-full filter md:filter-none"
+            alt="Home Banner"
+          />
+          <div className="absolute inset-0 flex flex-col items-center justify-center space-y-2 max-w-[80%] mx-auto">
+            <h1 className="text-xl md:text-2xl font-bold text-primary text-center hidden md:block">
+              Chúng Tôi Giúp Bạn Dễ Dàng Mua Sắm Thiết Bị CNTT
+            </h1>
+            <p className="text-xs md:text-sm text-center text-gray-700 hidden md:block">
+              Chúng tôi là Hoàng Anh Technology, công ty cung cấp phần cứng và
+              giải pháp cho doanh nghiệp của bạn, từ giai đoạn khởi đầu đến mở
+              rộng.
+            </p>
+            <div className="flex flex-wrap justify-center bg-white p-2 space-x-1 md:space-x-2 text-blue-600">
+              {categories.map((category) => (
+                <a
+                  key={category._id}
+                  className="text-md items-center flex gap-1 pr-4"
+                  href={`/product-list/${category.slug}`}
+                >
+                  {category.title} <RightOutlined className="text-sm" />
+                </a>
+              ))}
             </div>
           </div>
         </div>

@@ -11,7 +11,6 @@ import {
   Input,
 } from "antd";
 import { useParams, useNavigate } from "react-router-dom";
-import { formatPrice } from "../../utils/helpers";
 import Product from "../../components/user/Product";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import DetailDescription from "../../components/user/DetailDescription";
@@ -351,14 +350,12 @@ function ProductDetail() {
                   <div className="flex flex-col gap-2">
                     {SaleContactTPHCM.map((contact, index) => (
                       <div className="flex gap-2 items-center" key={index}>
-                        <div className="">
-                          <video width="32" height="32" autoPlay loop muted>
-                            <source
-                              src="/images/icons/telephone.mp4"
-                              type="video/mp4"
-                            />
-                            Your browser does not support the video tag.
-                          </video>
+                        <div className="animate-ring">
+                          <img
+                            src="/images/icons/phone-icon.png"
+                            className="w-6 h-6 animate-ring"
+                            alt="phone icon"
+                          />
                         </div>
                         <div className="flex flex-col" key={index}>
                           <span className=" text-primary font-semibold">
@@ -399,14 +396,12 @@ function ProductDetail() {
                   <div className="flex flex-col gap-2">
                     {SaleContactCT.map((contact, index) => (
                       <div className="flex gap-2 items-center" key={index}>
-                        <div className="">
-                          <video width="32" height="32" autoPlay loop muted>
-                            <source
-                              src="/images/icons/telephone.mp4"
-                              type="video/mp4"
-                            />
-                            Your browser does not support the video tag.
-                          </video>
+                        <div className="animate-ring">
+                          <img
+                            src="/images/icons/phone-icon.png"
+                            className="w-6 h-6 animate-ring"
+                            alt="phone icon"
+                          />
                         </div>
                         <div className="flex flex-col" key={index}>
                           <span className=" text-primary font-semibold">
@@ -444,14 +439,12 @@ function ProductDetail() {
                   <div className="flex flex-col gap-1">
                     {TechniqueContact.map((contact, index) => (
                       <div className="flex gap-2 items-center" key={index}>
-                        <div className=" ">
-                          <video width="32" height="32" autoPlay loop muted>
-                            <source
-                              src="/images/icons/telephone.mp4"
-                              type="video/mp4"
-                            />
-                            Your browser does not support the video tag.
-                          </video>
+                        <div className="animate-ring">
+                          <img
+                            src="/images/icons/phone-icon.png"
+                            className="w-6 h-6 animate-ring"
+                            alt="phone icon"
+                          />
                         </div>
                         <div className="flex flex-col" key={index}>
                           <span className=" text-primary font-semibold">

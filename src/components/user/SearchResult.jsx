@@ -15,10 +15,8 @@ function SearchResult({ searchValue, onClose }) {
   const handleProductClick = async (productSlug) => {
     try {
       await axios.put(`/product/${productSlug}/views`);
-      navigate(`/product/${productSlug}`);
     } catch (error) {
       console.error("Error updating views:", error);
-      navigate(`/product/${productSlug}`);
     }
 
     onClose();

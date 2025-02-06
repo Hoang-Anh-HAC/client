@@ -56,7 +56,6 @@ const Product = ({
 
         const response = await axios.get(`/product?${queryParams.toString()}`);
 
-        console.log(response.data);
         if (response.data?.products?.length === 0) {
           setError("Không có sản phẩm trong danh mục này.");
           setProducts([]);

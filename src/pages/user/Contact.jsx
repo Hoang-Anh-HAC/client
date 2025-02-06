@@ -43,7 +43,7 @@ function Contact() {
                       d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
                     />
                   </svg>
-                  74/28 Trường Quốc Dũng, Phường 10, Quận Phú Nhuận, Tp HCM
+                  74/28 Trương Quốc Dung, Phường 10, Quận Phú Nhuận, Tp HCM
                 </p>
 
                 <p className="flex items-center gap-2">
@@ -99,8 +99,8 @@ function Contact() {
                     Phòng kỹ thuật - Hỗ trợ bảo hành:
                   </h3>
                   <p className="text-gray-600">Mr Hưng</p>
-                  <p className="text-gray-600">SĐT: 0907 406 5061</p>
-                  <p className="text-gray-600">Email: hungnguyent@hac.com.vn</p>
+                  <p className="text-gray-600">SĐT: 0824 636 768</p>
+                  <p className="text-gray-600">Email: hungnguyen@hac.com.vn</p>
                 </div>
 
                 <div className="space-y-2">

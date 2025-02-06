@@ -14,6 +14,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { formatPrice } from "../../utils/helpers";
 import Product from "../../components/user/Product";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import DetailDescription from "../../components/user/DetailDescription";
 
 function ProductDetail() {
   const { slug } = useParams();
@@ -139,7 +140,44 @@ function ProductDetail() {
   const handleCancel = () => {
     setIsModalVisible(false);
   };
+  const ContactContent = `
+  ## Địa điểm phân phối chính hãng sản phẩm: ${product.title} 
+  
 
+  ---
+
+  ### Vì sao nên chọn mua sản phẩm **${product.title}** tại HAC:
+
+  Tất cả những sản phẩm như *Switch*, *Router*, *Firewall*, *Module quang* do **HAC** cung cấp trên thị trường đều cam kết chính hãng. Kèm theo đó là dịch vụ hỗ trợ 24/7 cho khách hàng sau mua tốt nhất.
+
+  Đến với **HAC**, bạn sẽ được trải nghiệm một dịch vụ bán hàng chuyên nghiệp, tận tình và hài lòng nhất. Liên hệ ngay bộ phận bán hàng để được tư vấn giá tốt nhất:
+
+  ---
+
+  ### Thông tin liên hệ:
+  **CÔNG TY TNHH PHÁT TRIỂN CNTT HOÀNG ANH**
+
+  **Địa chỉ:** 74/28 Trương Quốc Dung, Phường 10, Quận Phú Nhuận, TP.HCM
+
+  **Điện thoại:** 0908 30 13 13
+
+  **Email:** [trungtran@hac.com.vn](mailto:trungtran@hac.com.vn)
+  `;
+
+  const SaleContactTPHCM = [
+    { title: "Mr. Trung", phone: "0908301313", email: "trungtran@hac.com.vn" },
+    { title: "Mr. Lành", phone: "0931054605", email: "lanhha@hac.com.vn" },
+    { title: "Ms. Giàu", phone: "0703582508", email: "giaule@hac.com.vn" },
+    { title: "Ms. Thảo", phone: "0938176262", email: "thaole@hac.com.vn" },
+  ];
+  const SaleContactCT = [
+    { title: "Mr. Trung", phone: "0908301313", email: "trungtran@hac.com.vn" },
+    { title: "Mr. Huy", phone: "0913107030", email: "huydo@hac.com.vn " },
+  ];
+
+  const TechniqueContact = [
+    { title: "Mr. Hưng", phone: "0974053061", email: "hungnguyen@hac.com.vn" },
+  ];
   return (
     <div className="w-full flex justify-center items-center px-4 lg:px-0">
       <div className="max-w-[1200px] flex flex-col gap-3 w-full">
@@ -271,32 +309,20 @@ function ProductDetail() {
                 </span>
               ))}
             </div>
-
-            <div className="grid bg-primary/5 p-4 rounded border border-dashed border-primary">
-              <p className="font-semibold mb-2">Hỗ Trợ Mua Hàng:</p>
-              <span className="text-sm lg:text-base">028 399 70399</span>
-              <span className="text-sm lg:text-base">090 830 1313</span>
-            </div>
           </div>
         </div>
-
-        {/* Description */}
         <div>
           <div className="flex flex-col lg:flex-row gap-3">
             <div
-              className={`bg-white p-4 ${
+              className={`bg-white pl-2 ${
                 product.specifications.length > 0 || matchingProducts.length > 0
                   ? "w-full lg:w-2/3"
                   : "w-full"
               }`}
             >
-              <h2 className="font-medium text-xl lg:text-2xl mb-2">
-                Mô tả sản phẩm
-              </h2>
-              <div
-                className="text-sm lg:text-base font-light prose max-w-none whitespace-pre-wrap"
-                dangerouslySetInnerHTML={{ __html: product.description }}
-              />
+              <h2 className="p-4 pb-0 text-2xl font-bold">Mô tả sản phẩm</h2>
+              <DetailDescription description={product.description} />
+
               <div className="flex justify-center">
                 {product.images?.[0]?.url && (
                   <img
@@ -306,6 +332,8 @@ function ProductDetail() {
                   />
                 )}
               </div>
+
+              <DetailDescription description={ContactContent} />
             </div>
 
             <div
@@ -315,6 +343,151 @@ function ProductDetail() {
                   : " "
               }`}
             >
+              <div className="grid bg-white p-4 rounded gap-2">
+                <div className="flex flex-col">
+                  <p className="font-semibold mb-2 text-lg">
+                    Hỗ Trợ Kinh Doanh TP.HCM:
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {SaleContactTPHCM.map((contact, index) => (
+                      <div className="flex gap-2 items-center" key={index}>
+                        <div className="">
+                          <video width="32" height="32" autoPlay loop muted>
+                            <source
+                              src="/images/icons/telephone.mp4"
+                              type="video/mp4"
+                            />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                        <div className="flex flex-col" key={index}>
+                          <span className=" text-primary font-semibold">
+                            {contact.title}
+                          </span>
+                          <span
+                            key={index}
+                            className="text-sm lg:text-base flex gap-2  justify-between	"
+                          >
+                            <div className="flex gap-1 items-center">
+                              <span>{contact.phone}</span>
+                              <a href={`https://zalo.me/${contact.phone}`}>
+                                <img
+                                  src="/images/icons/zalo-icon.png"
+                                  className=" w-5 "
+                                />
+                              </a>
+                            </div>
+                            <div className="flex gap-1 items-center ">
+                              <span>{contact.email}</span>
+
+                              <img
+                                src="/images/icons/gmail-icon.png"
+                                className=" w-5 "
+                              />
+                            </div>
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col">
+                  <p className="font-semibold text-lg mb-2">
+                    Hỗ Trợ Kinh Doanh Cần Thơ:
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {SaleContactCT.map((contact, index) => (
+                      <div className="flex gap-2 items-center" key={index}>
+                        <div className="">
+                          <video width="32" height="32" autoPlay loop muted>
+                            <source
+                              src="/images/icons/telephone.mp4"
+                              type="video/mp4"
+                            />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                        <div className="flex flex-col" key={index}>
+                          <span className=" text-primary font-semibold">
+                            {contact.title}
+                          </span>
+                          <span
+                            key={index}
+                            className="text-sm lg:text-base flex gap-2"
+                          >
+                            <div className="flex gap-1 items-center">
+                              <span>{contact.phone}</span>
+                              <a href={`https://zalo.me/${contact.phone}`}>
+                                <img
+                                  src="/images/icons/zalo-icon.png"
+                                  className=" w-5 "
+                                />
+                              </a>
+                            </div>
+                            <div className="flex gap-1 items-center ">
+                              <span>{contact.email}</span>
+                              <img
+                                src="/images/icons/gmail-icon.png"
+                                className=" w-5 "
+                              />
+                            </div>
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col">
+                  <p className="font-semibold mb-2 text-lg">Hỗ Trợ Kỹ Thuật:</p>
+                  <div className="flex flex-col gap-1">
+                    {TechniqueContact.map((contact, index) => (
+                      <div className="flex gap-2 items-center" key={index}>
+                        <div className=" ">
+                          <video width="32" height="32" autoPlay loop muted>
+                            <source
+                              src="/images/icons/telephone.mp4"
+                              type="video/mp4"
+                            />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                        <div className="flex flex-col" key={index}>
+                          <span className=" text-primary font-semibold">
+                            {contact.title}
+                          </span>
+                          <span
+                            key={index}
+                            className="text-sm lg:text-base flex gap-2"
+                          >
+                            <div className="flex gap-1 items-center">
+                              <span>{contact.phone}</span>
+                              <a href={`https://zalo.me/${contact.phone}`}>
+                                <img
+                                  src="/images/icons/zalo-icon.png"
+                                  className=" w-5 "
+                                />
+                              </a>
+                            </div>
+                            <div className="flex gap-1 items-center ">
+                              <span>{contact.email}</span>
+                              <img
+                                src="/images/icons/gmail-icon.png"
+                                className=" w-5 "
+                              />
+                            </div>
+                          </span>
+                        </div>
+                        <div>
+                          <img />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               {product.specifications.length > 0 && (
                 <div className="bg-white p-4">
                   <h2 className="font-medium text-xl lg:text-2xl mb-2">
@@ -344,7 +517,7 @@ function ProductDetail() {
                                   {detail.title}
                                 </td>
                                 <td
-                                  className="px-4 py-2 border border-gray-200 whitespace-pre-wrap"
+                                  className="px-4 py-2 border border-gray-200"
                                   dangerouslySetInnerHTML={{
                                     __html: detail.description,
                                   }}
@@ -416,10 +589,11 @@ function ProductDetail() {
                   // Logic để cuộn sang trái
                   document
                     .getElementById("product-series")
-                    .scrollBy({ left: -400, behavior: "smooth" });
+                    .scrollBy({ left: -250, behavior: "smooth" });
                 }}
+                aria-label="Scroll left"
               >
-                <LeftOutlined className="text-lg" />
+                <span className="text-lg">&#8592;</span> {/* Mũi tên trái */}
               </button>
               <div
                 id="product-series"
@@ -437,10 +611,11 @@ function ProductDetail() {
                   // Logic để cuộn sang phải
                   document
                     .getElementById("product-series")
-                    .scrollBy({ left: 400, behavior: "smooth" });
+                    .scrollBy({ left: 250, behavior: "smooth" });
                 }}
+                aria-label="Scroll right"
               >
-                <RightOutlined className="text-lg" />
+                <span className="text-lg">&#8594;</span> {/* Mũi tên phải */}
               </button>
             </div>
           </div>

@@ -14,7 +14,7 @@ function ProductList() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalProducts, setTotalProducts] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [category, setCategory] = useState(null);
   const [brand, setBrand] = useState(null);
   const [filters, setFilters] = useState([]);

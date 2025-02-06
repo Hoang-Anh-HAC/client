@@ -23,6 +23,10 @@ const slides = [
     img: "/images/banner/banner-slide-04.png",
     alt: "Banner slide 4",
   },
+  {
+    img: "/images/banner/banner-slide-05.png",
+    alt: "Banner slide 5",
+  },
 ];
 
 // Custom arrows components

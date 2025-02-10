@@ -83,20 +83,20 @@ function About() {
           {/* Phần thống kê và thành tựu */}
           <div className="grid grid-cols-2 gap-6">
             <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-              <div className="text-4xl font-bold text-primary mb-2">500+</div>
-              <div className="text-gray-600">Khách hàng tin tưởng</div>
+              <div className="text-4xl font-bold text-primary mb-2">24/7</div>
+              <div className="text-gray-600">Hỗ trợ khách hàng</div>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+              <div className="text-4xl font-bold text-primary mb-2">99%</div>
+              <div className="text-gray-600">Khách hàng hài lòng</div>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
               <div className="text-4xl font-bold text-primary mb-2">10+</div>
               <div className="text-gray-600">Năm kinh nghiệm</div>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-              <div className="text-4xl font-bold text-primary mb-2">100+</div>
-              <div className="text-gray-600">Dự án thành công</div>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-              <div className="text-4xl font-bold text-primary mb-2">50+</div>
-              <div className="text-gray-600">Chuyên gia IT</div>
+              <div className="text-4xl font-bold text-primary mb-2">200+</div>
+              <div className="text-gray-600">Sản phẩm cung cấp</div>
             </div>
           </div>
         </div>

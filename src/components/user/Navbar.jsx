@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import CategoryList from "./CategoryList";
-import { Menu, Input, message, Drawer } from "antd";
+import { Menu, Input, Drawer } from "antd";
 import {
   AppstoreOutlined,
   MailOutlined,
   SettingOutlined,
-  LeftOutlined,
-  RightOutlined,
 } from "@ant-design/icons";
 
 import { Carousel } from "antd";

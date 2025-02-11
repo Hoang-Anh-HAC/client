@@ -7,19 +7,19 @@ const footerItems = [
   {
     title: "VỀ HAC",
     items: [
-      "Giới thiệu công ty",
-      "Thông tin đối tác",
-      "Thông tin tuyển dụng",
-      "Thông tin liên hệ",
+      { text: "Giới thiệu", link: "/about" },
+      { text: "Thông tin liên hệ", link: "/contact" },
+      { text: "Thông tin đối tác ", link: "#" },
+      { text: "Thông tin tuyển dụng", link: "#" },
     ],
   },
   {
     title: "Chính sách công ty",
     items: [
-      "Chính sách bảo mật",
-      "Điều khoản sử dụng",
-      "Chính sách đổi trả",
-      "Chính sách vận chuyển",
+      { text: "Chính sách bảo mật", link: "#" },
+      { text: "Điều khoản sử dụng", link: "#" },
+      { text: "Chính sách đổi trả", link: "#" },
+      { text: "Chính sách vận chuyển", link: "#" },
     ],
   },
   {
@@ -29,9 +29,14 @@ const footerItems = [
         text: "Địa chỉ: 74/28 Trương Quốc Dung, Phường 10, Quận Phú Nhuận, TP.HCM",
         link: "https://maps.app.goo.gl/bFiENRyY6cftbT5v6",
       },
-      `Điện thoại: (028) 399 70 399`,
-      `Hotline: 0908 30 13 13 (Mr. Trung Trần)`,
-      `Email: trungtran@hac.com.vn`,
+      {
+        text: `Điện thoại: 0908 30 13 13 (Mr. Trung Trần)`,
+        link: "https://zalo.me/0908301313",
+      },
+      {
+        text: `Email: trungtran@hac.com.vn`,
+        link: "mailto:trungtran@hac.com.vn",
+      },
     ],
   },
 ];
@@ -55,7 +60,7 @@ function FooterLayout() {
                 CÔNG TY TNHH PHÁT TRIỂN CNTT HOÀNG ANH
               </h1>
               <p className="text-sm text-gray-600 mb-4">
-                Mã số thuế: 0313519285
+                Mã số thuế: 0312474252
               </p>
 
               {/* Social Media Icons */}
@@ -93,18 +98,6 @@ function FooterLayout() {
               </div>
 
               {/* Certification Badges */}
-              <div className="flex gap-4">
-                <img
-                  src="/dathongbao.png"
-                  alt="Đã thông báo Bộ Công Thương"
-                  className="h-12 object-contain"
-                />
-                <img
-                  src="/dmca.png"
-                  alt="DMCA Protected"
-                  className="h-12 object-contain"
-                />
-              </div>
             </div>
           </div>
 

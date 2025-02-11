@@ -118,7 +118,12 @@ function Contact() {
                   Tài khoản số: 1670342339 Tại Ngân Hàng ACB-CN Nguyễn Văn Trỗi
                 </p>
                 <p>Mã số thuế: 0312474252</p>
-                <p>Website: http://www.hac.com.vn</p>
+                <a href="http://www.hac.com.vn">
+                  Website:{" "}
+                  <span className="underline text-primary">
+                    http://www.hac.com.vn
+                  </span>
+                </a>
               </div>
             </div>
           </div>

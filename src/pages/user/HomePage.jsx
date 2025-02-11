@@ -168,7 +168,7 @@ const HomePage = () => {
           <div className="space-y-2 pt-2">
             <div className="bg-white p-8  shadow-md">
               <h2 className="text-2xl font-semibold text-primary mb-8 text-center">
-                <span className="border-b-2 border-primary pb-2">
+                <span className="border-b-2 border-primary pb-2 ">
                   Đối Tác Của Chúng Tôi
                 </span>
               </h2>

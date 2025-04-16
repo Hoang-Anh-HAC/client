@@ -1,7 +1,8 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { ADMIN_RANDOM_CODE_URL } from "./constants/adminConstants";
 import { DataProvider } from "./contexts/DataContext";
+
+import { ADMIN_URL } from "./constants/adminConstants";
 
 // Layouts
 import MainLayout from "./layouts/MainLayout";
@@ -30,7 +31,6 @@ import About from "./pages/user/About";
 import Contact from "./pages/user/Contact";
 
 // Components
-import ProtectedRoute from "./components/admin/layout/ProtectedRoute";
 import ScrollToTop from "./components/user/ScrollToTop";
 
 // Routes Configuration
@@ -75,10 +75,10 @@ function App() {
 
         {/* Admin Login */}
         <Route
-          path={`/${ADMIN_RANDOM_CODE_URL}/admin-login`}
+          path={`/${ADMIN_URL}/admin-login`}
           element={
             isLoggedIn ? (
-              <Navigate to={`/${ADMIN_RANDOM_CODE_URL}/home-admin`} />
+              <Navigate to={`/${ADMIN_URL}/admin-login`} />
             ) : (
               <LoginAdmin />
             )
@@ -86,14 +86,7 @@ function App() {
         />
 
         {/* Admin Routes */}
-        <Route
-          path={ADMIN_RANDOM_CODE_URL}
-          element={
-            <ProtectedRoute>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
+        <Route path={ADMIN_URL} element={<AdminLayout />}>
           {adminRoutes.map(({ path, element }) => (
             <Route key={path} path={path} element={element} />
           ))}

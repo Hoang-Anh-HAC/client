@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Collapse, Checkbox, Spin } from "antd";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { Card, Checkbox, Spin, Empty, ConfigProvider, Radio } from "antd";
 import axios from "../../utils/axiosConfig";
 
 const Filter = ({
@@ -13,135 +13,217 @@ const Filter = ({
   const [loading, setLoading] = useState({});
   const [selectedOptions, setSelectedOptions] = useState(selectedTags);
   const [tempSelectedOptions, setTempSelectedOptions] = useState(selectedTags);
+  const [expanded, setExpanded] = useState({});
 
   useEffect(() => {
-    if (isMobile) {
-      setTempSelectedOptions(selectedTags);
-    } else {
-      setSelectedOptions(selectedTags);
-    }
+    isMobile
+      ? setTempSelectedOptions(selectedTags)
+      : setSelectedOptions(selectedTags);
   }, [selectedTags, isMobile]);
 
   useEffect(() => {
+    if (filterData.length === 0) return;
     setOptions({});
     setSelectedOptions([]);
+    filterData.forEach(({ _id }) => fetchOptions(_id));
   }, [filterData]);
 
-  const fetchOptions = async (filterID) => {
+  const fetchOptions = useCallback(async (filterID) => {
     setLoading((prev) => ({ ...prev, [filterID]: true }));
     try {
       const response = await axios.get(`/option?filterID=${filterID}`);
       setOptions((prev) => ({
         ...prev,
-        [filterID]: response.data,
+        [filterID]: {
+          items: response.data
+            .map(({ _id, title, count = 0 }) => ({ id: _id, title, count }))
+            .sort((a, b) => {
+              const titleA = a.title.toLowerCase();
+              const titleB = b.title.toLowerCase();
+              if (titleA === titleB) return a.count - b.count;
+              return titleA.localeCompare(titleB, undefined, { numeric: true });
+            }),
+        },
       }));
     } catch (error) {
       console.error("Error fetching options:", error);
+      setOptions((prev) => ({
+        ...prev,
+        [filterID]: { hierarchical: false, items: [] },
+      }));
     } finally {
       setLoading((prev) => ({ ...prev, [filterID]: false }));
     }
-  };
+  }, []);
 
-  const handleOptionChange = (optionId, optionTitle, filterTitle) => {
-    if (isMobile) {
-      const newOptions = tempSelectedOptions.some((opt) => opt.id === optionId)
-        ? tempSelectedOptions.filter((opt) => opt.id !== optionId)
-        : [
-            ...tempSelectedOptions,
-            { id: optionId, title: optionTitle, filterTitle },
-          ];
+  const handleOptionChange = useCallback(
+    (optionId, optionTitle, filterTitle) => {
+      let newOptions;
 
-      setTempSelectedOptions(newOptions);
-      onTempFilterChange?.(newOptions);
-    } else {
-      const newOptions = selectedOptions.some((opt) => opt.id === optionId)
-        ? selectedOptions.filter((opt) => opt.id !== optionId)
-        : [
-            ...selectedOptions,
-            { id: optionId, title: optionTitle, filterTitle },
-          ];
+      if (
+        filterTitle === "Số Cổng" ||
+        filterTitle === "Switch Type" ||
+        filterTitle == "Routing/Switching Feature"
+      ) {
+        // Chỉ cho phép chọn một giá trị duy nhất
+        newOptions = [
+          ...selectedOptions.filter((opt) => opt.filterTitle !== filterTitle),
+          { id: optionId, title: optionTitle, filterTitle },
+        ];
+      } else {
+        newOptions = selectedOptions.some((opt) => opt.id === optionId)
+          ? selectedOptions.filter((opt) => opt.id !== optionId)
+          : [
+              ...selectedOptions,
+              { id: optionId, title: optionTitle, filterTitle },
+            ];
+      }
 
-      setSelectedOptions(newOptions);
-      onFilterChange(newOptions);
-    }
-  };
-
-  const handleClearFilterOptions = (filterId) => {
-    const filterOptions = options[filterId] || [];
-    if (isMobile) {
-      const newTempOptions = tempSelectedOptions.filter(
-        (opt) => !filterOptions.some((filterOpt) => filterOpt._id === opt.id)
-      );
-      setTempSelectedOptions(newTempOptions);
-      onTempFilterChange?.(newTempOptions);
-    } else {
-      const newSelectedOptions = selectedOptions.filter(
-        (opt) => !filterOptions.some((filterOpt) => filterOpt._id === opt.id)
-      );
-      setSelectedOptions(newSelectedOptions);
-      onFilterChange(newSelectedOptions);
-    }
-  };
-
-  const getIsChecked = (optionId) => {
-    if (isMobile) {
-      return tempSelectedOptions?.some((opt) => opt.id === optionId);
-    }
-    return selectedOptions?.some((opt) => opt.id === optionId);
-  };
-
-  if (!filterData || !Array.isArray(filterData)) {
-    return null;
-  }
-
-  const items = filterData.map((filter) => ({
-    key: filter._id,
-    label: (
-      <div className="flex justify-between items-center w-full">
-        <div className="font-semibold">{filter.title}</div>
-        {options[filter._id]?.some((option) =>
-          selectedOptions.some((opt) => opt.id === option._id)
-        ) && (
-          <span
-            className="cursor-pointer hover:underline text-primary text-sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClearFilterOptions(filter._id);
-            }}
-          >
-            Bỏ chọn
-          </span>
-        )}
-      </div>
-    ),
-    children: loading[filter._id] ? (
-      <div className="flex justify-center py-2">
-        <Spin size="small" />
-      </div>
-    ) : (
-      <div className="grid gap-2">
-        {options[filter._id]?.map((option) => (
-          <Checkbox
-            key={option._id}
-            className="text-sm"
-            checked={getIsChecked(option._id)}
-            onChange={() =>
-              handleOptionChange(option._id, option.title, filter.title)
-            }
-          >
-            {option.title}
-          </Checkbox>
-        ))}
-      </div>
-    ),
-    onItemClick: () => {
-      if (!options[filter._id]) {
-        fetchOptions(filter._id);
+      if (isMobile) {
+        setTempSelectedOptions(newOptions);
+        onTempFilterChange?.(newOptions);
+      } else {
+        setSelectedOptions(newOptions);
+        onFilterChange(newOptions);
       }
     },
-  }));
+    [isMobile, selectedOptions, onFilterChange, onTempFilterChange]
+  );
 
-  return <Collapse items={items} ghost expandIconPosition="end" />;
+  const toggleExpanded = useCallback((filterID) => {
+    setExpanded((prev) => ({
+      ...prev,
+      [filterID]: !prev[filterID],
+    }));
+  }, []);
+
+  const renderFilter = useCallback(
+    (filterData, filterTitle, filterID) => {
+      if (!filterData?.items?.length) {
+        return (
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description="Không có tùy chọn"
+            className="py-4"
+          />
+        );
+      }
+
+      const isRadioFilter =
+        filterTitle === "Số Cổng" ||
+        filterTitle === "Switch Type" ||
+        filterTitle === "Routing/Switching Feature";
+      const selectedValue = (
+        isMobile ? tempSelectedOptions : selectedOptions
+      ).find((opt) => opt.filterTitle === filterTitle)?.id;
+
+      return (
+        <div className="grid gap-2 border-b-[1px] border-grey py-3 pt-4">
+          <div
+            className="text-base font-medium cursor-pointer flex justify-between"
+            onClick={() => toggleExpanded(filterID)}
+          >
+            <span>{filterTitle}</span>
+            <span className="text-lg">{expanded[filterID] ? "-" : "+"}</span>
+          </div>
+          {expanded[filterID] &&
+            (isRadioFilter ? (
+              <Radio.Group
+                onChange={(e) =>
+                  handleOptionChange(
+                    e.target.value,
+                    filterData.items.find((item) => item.id === e.target.value)
+                      ?.title,
+                    filterTitle
+                  )
+                }
+                value={selectedValue} // Đặt value đúng với Radio
+                className={`grid gap-2 items-center ${
+                  filterTitle == "Switch Type" ||
+                  filterTitle == "Routing/Switching Feature"
+                    ? "grid-cols-1"
+                    : "grid-cols-2"
+                }`}
+              >
+                {filterData.items.map(({ id, title }) => (
+                  <ConfigProvider
+                    theme={{
+                      token: {
+                        colorBorder: "#000",
+                      },
+                    }}
+                  >
+                    <Radio key={id} value={id} className="text-sm">
+                      {title}
+                    </Radio>
+                  </ConfigProvider>
+                ))}
+              </Radio.Group>
+            ) : (
+              filterData.items.map(({ id, title }) => (
+                <ConfigProvider
+                  theme={{
+                    token: {
+                      colorBorder: "#000",
+                    },
+                  }}
+                >
+                  <Checkbox
+                    key={id}
+                    className="text-sm"
+                    onChange={() => handleOptionChange(id, title, filterTitle)}
+                    checked={(isMobile
+                      ? tempSelectedOptions
+                      : selectedOptions
+                    ).some((opt) => opt.id === id)}
+                  >
+                    {title}
+                  </Checkbox>
+                </ConfigProvider>
+              ))
+            ))}
+        </div>
+      );
+    },
+    [
+      handleOptionChange,
+      isMobile,
+      selectedOptions,
+      tempSelectedOptions,
+      expanded,
+      toggleExpanded,
+    ]
+  );
+
+  return (
+    <Card
+      bordered={false}
+      className=" rounded-lg shadow-sm pb-10"
+      style={{ background: "transparent" }}
+    >
+      <ConfigProvider
+        theme={{
+          components: {
+            Checkbox: { colorPrimary: "#1890ff" },
+          },
+        }}
+      >
+        <div className="px-4">
+          {filterData.map(({ _id, title }) => (
+            <div key={_id}>
+              {loading[_id] ? (
+                <div className="flex justify-center items-center py-6">
+                  <Spin tip="Đang tải..." />
+                </div>
+              ) : (
+                renderFilter(options[_id], title, _id)
+              )}
+            </div>
+          ))}
+        </div>
+      </ConfigProvider>
+    </Card>
+  );
 };
 
-export default Filter;
+export default React.memo(Filter);

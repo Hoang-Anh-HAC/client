@@ -10,50 +10,50 @@ import {
   FilterOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { ADMIN_RANDOM_CODE_URL } from "../../../constants/adminConstants";
+import { ADMIN_URL } from "../../../constants/adminConstants";
 
 function HomeAdmin() {
   const adminMenus = [
     {
       title: "Quản lý Sản phẩm",
       icon: <ShoppingOutlined className="text-2xl" />,
-      path: `/${ADMIN_RANDOM_CODE_URL}/manage-product`,
+      path: `/${ADMIN_URL}/manage-product`,
       description: "Thêm, sửa, xóa và quản lý sản phẩm",
     },
     {
       title: "Quản lý Thương hiệu",
       icon: <TagsOutlined className="text-2xl" />,
-      path: `/${ADMIN_RANDOM_CODE_URL}/manage-brand`,
+      path: `/${ADMIN_URL}/manage-brand`,
       description: "Quản lý các thương hiệu sản phẩm",
     },
     {
       title: "Quản lý Danh mục",
       icon: <AppstoreOutlined className="text-2xl" />,
-      path: `/${ADMIN_RANDOM_CODE_URL}/manage-category`,
+      path: `/${ADMIN_URL}/manage-category`,
       description: "Quản lý danh mục sản phẩm",
     },
     {
       title: "Quản lý Form",
       icon: <FormOutlined className="text-2xl" />,
-      path: `/${ADMIN_RANDOM_CODE_URL}/form`,
+      path: `/${ADMIN_URL}/form`,
       description: "Xem và quản lý các form liên hệ",
     },
     {
       title: "Quản lý Series",
       icon: <BranchesOutlined className="text-2xl" />,
-      path: `/${ADMIN_RANDOM_CODE_URL}/manage-series`,
+      path: `/${ADMIN_URL}/manage-series`,
       description: "Quản lý các dòng sản phẩm",
     },
     {
       title: "Quản lý Filter & Option",
       icon: <FilterOutlined className="text-2xl" />,
-      path: `/${ADMIN_RANDOM_CODE_URL}/manage-option`,
+      path: `/${ADMIN_URL}/manage-option`,
       description: "Quản lý bộ lọc và tùy chọn",
     },
     {
       title: "Thêm Sản Phẩm",
       icon: <PlusOutlined className="text-2xl" />,
-      path: `/${ADMIN_RANDOM_CODE_URL}/manage-product/add-product`,
+      path: `/${ADMIN_URL}/manage-product/add-product`,
       description: "Thêm sản phẩm mới vào hệ thống",
     },
   ];

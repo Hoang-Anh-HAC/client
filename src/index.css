@@ -85,3 +85,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.ant-card .ant-card-body {
+  padding: 0px 0px 0px 0px !important;
+}

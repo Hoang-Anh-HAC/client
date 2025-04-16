@@ -14,7 +14,6 @@ function CustomTextArea({
   className = "",
 }) {
   const handleEditorChange = ({ text }) => {
-    // Cập nhật giá trị khi nội dung markdown thay đổi
     onChange({ target: { name, value: text } });
   };
 
@@ -22,12 +21,11 @@ function CustomTextArea({
     <div className={`mb-4 ${className}`}>
       {label && <label className="block mb-2 font-medium">{label}:</label>}
       <div className="border border-gray-300 rounded">
-        {/* Markdown editor */}
         <ReactMarkdownEditorLite
           value={value}
           style={{ height: "400px" }}
-          renderHTML={(text) => mdParser.render(text)} // Dùng markdown-it để render HTML
-          onChange={handleEditorChange} // Cập nhật giá trị khi thay đổi
+          renderHTML={(text) => mdParser.render(text)}
+          onChange={handleEditorChange}
           placeholder={placeholder}
         />
       </div>

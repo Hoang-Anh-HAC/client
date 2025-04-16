@@ -24,7 +24,7 @@ import {
   FilterOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { ADMIN_RANDOM_CODE_URL } from "../../../constants/adminConstants";
+import { ADMIN_URL } from "../../../constants/adminConstants";
 
 const { Option } = Select;
 
@@ -42,45 +42,52 @@ function ManageProduct() {
   const [categories, setCategories] = useState([]);
   const [deletingProducts, setDeletingProducts] = useState(new Set());
 
+  const token = localStorage.getItem("adminToken");
+
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const queryParams = new URLSearchParams({
-          page: currentPage,
-          limit: itemsPerPage,
-        });
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const queryParams = new URLSearchParams({
+        page: currentPage,
+        limit: itemsPerPage,
+      });
 
-        if (searchTerm) {
-          queryParams.append("keyword", searchTerm);
-        }
-        if (selectedBrand) {
-          queryParams.append("brandID", selectedBrand);
-        }
-        if (selectedCategory) {
-          queryParams.append("categoryID", selectedCategory);
-        }
-
-        const { data } = await axios.get(
-          `product/admin?${queryParams.toString()}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-            },
-          }
-        );
-        setProducts(data.products);
-        setTotalProducts(data.totalProducts);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        message.error("Không th tải danh sách sản phẩm");
-      } finally {
-        setLoading(false);
+      if (searchTerm) {
+        queryParams.append("keyword", searchTerm);
       }
-    };
+      if (selectedBrand) {
+        queryParams.append("brandID", selectedBrand);
+      }
+      if (selectedCategory) {
+        queryParams.append("categoryID", selectedCategory);
+      }
 
+      const { data } = await axios.get(
+        `product/admin?${queryParams.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
+        }
+      );
+      setProducts(data.products);
+      setTotalProducts(data.totalProducts);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      message.error("Không th tải danh sách sản phẩm");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!token) {
+      message.error("Vui lòng đăng nhập");
+      navigate("/admin-hac/admin-login");
+      return;
+    }
     fetchProducts();
   }, [currentPage, searchTerm, selectedBrand, selectedCategory]);
 
@@ -102,11 +109,10 @@ function ManageProduct() {
   }, []);
 
   const handleProductClick = (productSlug) => {
-    navigate(`/${ADMIN_RANDOM_CODE_URL}/manage-product/product/${productSlug}`);
+    navigate(`/${ADMIN_URL}/manage-product/product/${productSlug}`);
   };
 
   const handleDeleteProduct = async (productId) => {
-    const token = localStorage.getItem("adminToken");
     setDeletingProducts((prev) => new Set([...prev, productId]));
 
     try {
@@ -173,9 +179,7 @@ function ManageProduct() {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() =>
-              navigate(`/${ADMIN_RANDOM_CODE_URL}/manage-product/add-product`)
-            }
+            onClick={() => navigate(`/${ADMIN_URL}/manage-product/add-product`)}
             className="bg-blue-500 hover:bg-blue-600"
           >
             Thêm Sản Phẩm
@@ -308,7 +312,7 @@ function ManageProduct() {
                           icon={<EyeOutlined />}
                           onClick={() =>
                             navigate(
-                              `/${ADMIN_RANDOM_CODE_URL}/manage-product/product/view/${product.slug}`
+                              `/${ADMIN_URL}/manage-product/product/view/${product.slug}`
                             )
                           }
                           className="flex items-center text-gray-500 hover:text-gray-600"

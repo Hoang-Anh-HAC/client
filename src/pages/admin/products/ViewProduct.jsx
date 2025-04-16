@@ -17,9 +17,10 @@ import {
   EyeOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import { ADMIN_RANDOM_CODE_URL } from "../../../constants/adminConstants";
+import { ADMIN_URL } from "../../../constants/adminConstants";
 import { useFetchData } from "../../../hooks/useFetchData";
 import axios from "../../../utils/axiosConfig";
+import DetailDescription from "../../../components/user/DetailDescription";
 
 function ViewProduct() {
   const [activeTab, setActiveTab] = React.useState("basic");
@@ -56,7 +57,7 @@ function ViewProduct() {
       });
 
       message.success("Xóa sản phẩm thành công");
-      navigate(`/${ADMIN_RANDOM_CODE_URL}/manage-product`);
+      navigate(`/${ADMIN_URL}/manage-product`);
     } catch (error) {
       console.error("Lỗi khi xóa sản phẩm:", error);
       message.error("Xóa sản phẩm thất bại. Vui lòng thử lại.");
@@ -114,9 +115,7 @@ function ViewProduct() {
           <div className="flex items-center space-x-4">
             <Button
               icon={<ArrowLeftOutlined />}
-              onClick={() =>
-                navigate(`/${ADMIN_RANDOM_CODE_URL}/manage-product`)
-              }
+              onClick={() => navigate(`/${ADMIN_URL}/manage-product`)}
               type="text"
               className="hover:bg-gray-100"
               disabled={isDeleting}
@@ -147,7 +146,7 @@ function ViewProduct() {
                 icon={<EditOutlined />}
                 onClick={() =>
                   navigate(
-                    `/${ADMIN_RANDOM_CODE_URL}/manage-product/product/${productSlug}`
+                    `/${ADMIN_URL}/manage-product/product/${productSlug}`
                   )
                 }
                 className="bg-blue-500"
@@ -242,10 +241,8 @@ function ViewProduct() {
               <Card title="Mô Tả & Thông Số Kỹ Thuật" className="mb-6">
                 <div>
                   <label className="text-gray-600">Mô tả:</label>
-                  <div
-                    className="mt-2 whitespace-pre-line"
-                    dangerouslySetInnerHTML={{ __html: product.description }}
-                  ></div>
+
+                  <DetailDescription description={product.description} />
                 </div>
 
                 <Divider />

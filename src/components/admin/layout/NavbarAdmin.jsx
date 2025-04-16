@@ -1,7 +1,7 @@
 import React from "react";
 import { Menu, message } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ADMIN_RANDOM_CODE_URL } from "../../../constants/adminConstants";
+import { ADMIN_URL } from "../../../constants/adminConstants";
 
 const items = [
   {
@@ -41,31 +41,27 @@ function NavbarAdmin() {
   const location = useLocation();
 
   const selectedKey = () => {
-    if (
-      location.pathname.includes(`/${ADMIN_RANDOM_CODE_URL}/manage-product`)
-    ) {
+    if (location.pathname.includes(`/${ADMIN_URL}/manage-product`)) {
       return "product";
     }
 
-    if (location.pathname.includes(`/${ADMIN_RANDOM_CODE_URL}/manage-brand`)) {
+    if (location.pathname.includes(`/${ADMIN_URL}/manage-brand`)) {
       return "brand";
     }
 
-    if (
-      location.pathname.includes(`/${ADMIN_RANDOM_CODE_URL}/manage-category`)
-    ) {
+    if (location.pathname.includes(`/${ADMIN_URL}/manage-category`)) {
       return "category";
     }
 
-    if (location.pathname.includes(`/${ADMIN_RANDOM_CODE_URL}/manage-option`)) {
+    if (location.pathname.includes(`/${ADMIN_URL}/manage-option`)) {
       return "option";
     }
 
-    if (location.pathname.includes(`/${ADMIN_RANDOM_CODE_URL}/form`)) {
+    if (location.pathname.includes(`/${ADMIN_URL}/form`)) {
       return "form";
     }
 
-    if (location.pathname.includes(`/${ADMIN_RANDOM_CODE_URL}/manage-series`)) {
+    if (location.pathname.includes(`/${ADMIN_URL}/manage-series`)) {
       return "series";
     }
     return items.find((item) => item.path === location.pathname)?.key || "home";
@@ -73,17 +69,17 @@ function NavbarAdmin() {
 
   const handleMenuClick = (key) => {
     const routes = {
-      home: `/${ADMIN_RANDOM_CODE_URL}/home-admin`,
-      product: `/${ADMIN_RANDOM_CODE_URL}/manage-product`,
-      brand: `/${ADMIN_RANDOM_CODE_URL}/manage-brand`,
-      category: `/${ADMIN_RANDOM_CODE_URL}/manage-category`,
-      option: `/${ADMIN_RANDOM_CODE_URL}/manage-option`,
-      series: `/${ADMIN_RANDOM_CODE_URL}/manage-series`,
-      form: `/${ADMIN_RANDOM_CODE_URL}/form`,
+      home: `/${ADMIN_URL}/home-admin`,
+      product: `/${ADMIN_URL}/manage-product`,
+      brand: `/${ADMIN_URL}/manage-brand`,
+      category: `/${ADMIN_URL}/manage-category`,
+      option: `/${ADMIN_URL}/manage-option`,
+      series: `/${ADMIN_URL}/manage-series`,
+      form: `/${ADMIN_URL}/form`,
       logout: () => {
         localStorage.removeItem("adminToken");
         message.success("Đăng xuất thành công!");
-        navigate(`/${ADMIN_RANDOM_CODE_URL}/admin-login`);
+        navigate(`/${ADMIN_URL}/admin-login`);
       },
     };
 

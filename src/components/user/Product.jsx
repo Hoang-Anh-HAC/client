@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../utils/axiosConfig";
-import { Button, Skeleton, Image, Empty } from "antd";
+import { Button, Skeleton, Image, Empty, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
 import { formatPrice } from "../../utils/helpers";
 import { InboxOutlined } from "@ant-design/icons";
@@ -108,16 +108,16 @@ const Product = ({
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-64">
-        <Skeleton />
+      <div className="flex items-center justify-center h-64  w-[950px]">
+        <Spin />
       </div>
     );
 
   if (error) {
     return (
-      <div className="col-span-full flex flex-col items-center justify-center min-h-[300px]">
+      <div className="col-span-full flex flex-col items-center justify-center min-h-[300px] min-w-[1000px]">
         <InboxOutlined className="text-4xl text-gray-400 mb-4" />
-        <h3 className="text-lg text-gray-600">
+        <h3 className="text-lg text-gray-600 w-full flex items-center justify-center">
           Không có sản phẩm trong danh mục này
         </h3>
       </div>
@@ -130,11 +130,12 @@ const Product = ({
         products.map((product) => (
           <div
             key={product._id}
-            className={`border-[1px] border-gray-300 rounded-sm flex ${
+            className={`border border-gray-300 rounded-sm flex ${
               layoutType === "horizontal"
                 ? "flex-row items-center gap-2 p-2 sm:p-3 w-full max-w-[500px]"
-                : "flex-col max-w-[250px]"
-            } h-auto hover:border-grey cursor-pointer overflow-hidden group`}
+                : "flex-col "
+            } h-auto hover:border-gray-400 cursor-pointer overflow-hidden 
+            transition-all duration-300 hover:shadow-md hover:-translate-y-1 bg-white `}
             onClick={() => handleProductClick(product)}
           >
             {/* Image Section */}
@@ -153,7 +154,7 @@ const Product = ({
                   preview={false}
                 />
               ) : (
-                <div className=" p-4 w-full h-full object-contain transition-transform duration-300 ease-in-out transform group-hover:scale-110 bg-gray-100 rounded flex items-center justify-center">
+                <div className="p-4 w-full h-full object-contain transition-transform duration-300 ease-in-out transform group-hover:scale-110 bg-gray-100 rounded flex items-center justify-center">
                   <span className="text-gray-400 text-xs">No image</span>
                 </div>
               )}
@@ -161,26 +162,24 @@ const Product = ({
 
             {/* Info Section */}
             <div
-              className={`flex flex-col justify-between ${
+              className={`flex flex-col  justify-between ${
                 layoutType === "horizontal"
                   ? "flex-1"
                   : "p-2 min-[380px]:p-3 xs:p-4"
-              } relative`}
+              } relative bg-white`}
             >
-              <p className="text-[12px] sm:text-[14px] font-medium line-clamp-2 text-red-600">
+              <p className="text-[12px] sm:text-[14px] font-medium line-clamp-2 text-red-600  ">
                 {product.productID}
               </p>
               <p className="text-[14px] sm:text-[16px] font-normal line-clamp-2">
                 {product.title}
               </p>
-              <div>
-                <p className="text-[16px] sm:text-[18px] font-semibold text-primary">
-                  Liên hệ
-                </p>
-              </div>
+              <p className="text-[16px] sm:text-[18px] font-semibold text-primary">
+                Liên hệ
+              </p>
 
               {/* Hover Arrow */}
-              <div className="absolute bottom-2 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute bottom-2 right-3 opacity-0 transition-opacity duration-300">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"

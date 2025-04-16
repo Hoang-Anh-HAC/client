@@ -8,24 +8,28 @@ import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
 const slides = [
   {
-    img: "/images/banner/banner-slide-01.png",
-    alt: "Banner slide 1",
-  },
-  {
-    img: "/images/banner/banner-slide-02.png",
-    alt: "Banner slide 2",
-  },
-  {
-    img: "/images/banner/banner-slide-03.jpg",
-    alt: "Banner slide 3",
-  },
-  {
-    img: "/images/banner/banner-slide-04.png",
+    img: "https://res.cloudinary.com/hac-cloud/image/upload/v1744270053/banner-slide-04.png",
     alt: "Banner slide 4",
   },
   {
-    img: "/images/banner/banner-slide-05.png",
+    img: "https://res.cloudinary.com/hac-cloud/image/upload/v1744270054/banner-slide-05.png",
     alt: "Banner slide 5",
+  },
+  {
+    img: "https://res.cloudinary.com/hac-cloud/image/upload/v1744270056/banner-slide-06.png",
+    alt: "Banner slide 6",
+  },
+  {
+    img: "https://res.cloudinary.com/hac-cloud/image/upload/v1744269946/banner-slide-01.png",
+    alt: "Banner slide 1",
+  },
+  {
+    img: "https://res.cloudinary.com/hac-cloud/image/upload/v1744269946/banner-slide-02.png",
+    alt: "Banner slide 2",
+  },
+  {
+    img: "https://res.cloudinary.com/hac-cloud/image/upload/v1744270000/banner-slide-03.png",
+    alt: "Banner slide 3",
   },
 ];
 

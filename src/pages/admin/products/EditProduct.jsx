@@ -26,8 +26,9 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 import { useImageHandler } from "../../../hooks/useImageHandler";
-import { ADMIN_RANDOM_CODE_URL } from "../../../constants/adminConstants";
+import { ADMIN_URL } from "../../../constants/adminConstants";
 import CustomTextArea from "../../../components/admin/forms/CustomTextArea";
+import UploadExcel from "../../../components/admin/shared/UploadExcel";
 
 function EditProduct() {
   const { productSlug } = useParams();
@@ -416,9 +417,7 @@ function EditProduct() {
             <div className="flex items-center space-x-4">
               <Button
                 icon={<ArrowLeftOutlined />}
-                onClick={() =>
-                  navigate(`/${ADMIN_RANDOM_CODE_URL}/manage-product`)
-                }
+                onClick={() => navigate(`/${ADMIN_URL}/manage-product`)}
                 type="text"
                 className="hover:bg-gray-100"
               >
@@ -524,6 +523,8 @@ function EditProduct() {
                             <h3 className="font-medium mb-4">
                               Thông Số Kỹ Thuật
                             </h3>
+
+                            <UploadExcel setProduct={setProduct} />
 
                             {product?.specifications?.map((spec, specIndex) => (
                               <div
@@ -661,6 +662,8 @@ function EditProduct() {
 
             {/* Right Column */}
             <div className="lg:col-span-1">
+              <div className="pb-6 font-semibold"> {product?.title}</div>
+
               <Card title="Hình Ảnh Sản Phẩm" className="mb-6">
                 <Spin spinning={imageLoading} tip="Đang xử lý...">
                   <div className="grid grid-cols-2 gap-2">

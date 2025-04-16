@@ -106,10 +106,10 @@ function ProductDetail() {
 
   const handleSubmit = async (values) => {
     try {
-      if (verificationAnswer.toUpperCase() !== verification.answer) {
-        message.error("Mã xác nhận không chính xác!");
-        return;
-      }
+      // if (verificationAnswer.toUpperCase() !== verification.answer) {
+      //   message.error("Mã xác nhận không chính xác!");
+      //   return;
+      // }
 
       setLoading(true);
       const response = await axios.post("prodform/", {
@@ -726,7 +726,7 @@ function ProductDetail() {
               <Input.TextArea rows={4} />
             </Form.Item>
 
-            <Form.Item label={verification.question}>
+            {/* <Form.Item label={verification.question}>
               <div className="space-y-2">
                 <div className="flex items-center">
                   <span
@@ -749,14 +749,14 @@ function ProductDetail() {
                   onChange={(e) => setVerificationAnswer(e.target.value)}
                 />
               </div>
-            </Form.Item>
+            </Form.Item> */}
 
             <Form.Item className="mb-0">
               <Button
                 type="primary"
                 htmlType="submit"
                 className="bg-primary w-full h-10"
-                disabled={loading || !verificationAnswer}
+                disabled={loading}
               >
                 GỬI YÊU CẦU
               </Button>

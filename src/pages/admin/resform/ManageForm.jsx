@@ -32,7 +32,7 @@ function ManageForm() {
       if (error.response?.status === 401) {
         message.error("Phiên đăng nhập đã hết hạn");
         localStorage.removeItem("adminToken");
-        navigate("/admin/login");
+        navigate("/admin-hac/admin-login");
       } else {
         message.error("Không thể tải dữ liệu form");
       }
@@ -44,11 +44,11 @@ function ManageForm() {
     // Kiểm tra token trước khi fetch data
     if (!adminToken) {
       message.error("Vui lòng đăng nhập");
-      navigate("/admin/login");
+      navigate("/admin-hac/admin-login");
       return;
     }
     fetchForms();
-  }, [adminToken, navigate]);
+  }, [navigate]);
 
   const getStatusSorter = () => ({
     sorter: (a, b) => {

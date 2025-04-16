@@ -181,6 +181,41 @@ function ManageOption() {
     }
   };
 
+  const moveOption = async (filterID, index, direction) => {
+    setFilters((prevFilters) =>
+      prevFilters.map((filter) => {
+        if (filter._id !== filterID) return filter;
+
+        const newOptionIDs = [...filter.optionIDs];
+        const newIndex = index + direction;
+
+        // Đổi chỗ hai option
+        [newOptionIDs[index], newOptionIDs[newIndex]] = [
+          newOptionIDs[newIndex],
+          newOptionIDs[index],
+        ];
+
+        return { ...filter, optionIDs: newOptionIDs };
+      })
+    );
+
+    try {
+      const response = await axios.put(
+        `/filter/${filterID}`,
+        {
+          optionIDs: filters
+            .find((f) => f._id === filterID)
+            .optionIDs.map((opt) => opt._id),
+        },
+        { headers: { Authorization: `Bearer ${adminToken}` } }
+      );
+      message.success("Đã cập nhật thứ tự thành công");
+    } catch (error) {
+      console.error("Lỗi khi cập nhật thứ tự option:", error);
+      message.error("Lỗi khi lưu thứ tự mới");
+    }
+  };
+
   const showEditModal = (option) => {
     setEditingOption(option);
     setModalOptionTitle(option.title);
@@ -295,7 +330,7 @@ function ManageOption() {
                       Không có option nào.
                     </span>
                   ) : (
-                    filter.optionIDs.map((option) => (
+                    filter.optionIDs.map((option, index) => (
                       <div
                         key={option._id}
                         className="flex justify-between items-center border rounded-md p-2 hover:border-blue-400 transition-colors"
@@ -307,6 +342,24 @@ function ManageOption() {
                           {option.title}
                         </p>
                         <div className="flex shrink-0">
+                          {/* Nút Di chuyển lên */}
+                          <Button
+                            type="text"
+                            onClick={() => moveOption(filter._id, index, -1)}
+                            disabled={index === 0}
+                            className="text-gray-500 hover:text-gray-700"
+                          >
+                            🔼
+                          </Button>
+                          {/* Nút Di chuyển xuống */}
+                          <Button
+                            type="text"
+                            onClick={() => moveOption(filter._id, index, 1)}
+                            disabled={index === filter.optionIDs.length - 1}
+                            className="text-gray-500 hover:text-gray-700"
+                          >
+                            🔽
+                          </Button>
                           <Button
                             type="text"
                             onClick={() => handleOptionDelete(option._id)}

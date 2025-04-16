@@ -20,8 +20,9 @@ import {
 import axios from "../../../utils/axiosConfig";
 import AddProductInput from "../../../components/admin/forms/AddProductInput";
 import { useNavigate } from "react-router-dom";
-import { ADMIN_RANDOM_CODE_URL } from "../../../constants/adminConstants";
+import { ADMIN_URL } from "../../../constants/adminConstants";
 import CustomTextArea from "../../../components/admin/forms/CustomTextArea";
+import UploadExcel from "../../../components/admin/shared/UploadExcel";
 
 const { Option } = Select;
 
@@ -351,6 +352,8 @@ function AddProduct() {
     }));
   };
 
+  const [specifications, setSpecifications] = useState([]);
+
   const handleSpecificationChange = (specIndex, e) => {
     const { name, value } = e.target;
     setProduct((prevProduct) => {
@@ -424,7 +427,7 @@ function AddProduct() {
   };
 
   const navigateBack = () => {
-    navigate(`/${ADMIN_RANDOM_CODE_URL}/manage-product`);
+    navigate(`/${ADMIN_URL}/manage-product`);
   };
 
   const props = {
@@ -543,6 +546,8 @@ function AddProduct() {
 
             <div className="specifications-section">
               <h3 className="font-medium mb-4">Thông Số Kỹ Thuật</h3>
+
+              <UploadExcel setProduct={setProduct} />
 
               {product.specifications.map((spec, specIndex) => (
                 <div key={specIndex} className="bg-gray-50 p-4 rounded-lg mb-4">

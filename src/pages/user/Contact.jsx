@@ -90,7 +90,7 @@ function Contact() {
                 <div className="space-y-2">
                   <h3 className="font-medium">Phòng kinh doanh:</h3>
                   <p className="text-gray-600">Mr Trung Trần</p>
-                  <p className="text-gray-600">SĐT: 0907 006 1313</p>
+                  <p className="text-gray-600">SĐT: 090 830 1313</p>
                   <p className="text-gray-600">Email: trungtran@hac.com.vn</p>
                 </div>
 
@@ -99,7 +99,7 @@ function Contact() {
                     Phòng kỹ thuật - Hỗ trợ bảo hành:
                   </h3>
                   <p className="text-gray-600">Mr Hưng</p>
-                  <p className="text-gray-600">SĐT: 0824 636 768</p>
+                  <p className="text-gray-600">SĐT: 097 405 3061</p>
                   <p className="text-gray-600">Email: hungnguyen@hac.com.vn</p>
                 </div>
 

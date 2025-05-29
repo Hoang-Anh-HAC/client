@@ -45,7 +45,7 @@ function FooterLayout() {
   const { categories } = useData();
 
   return (
-    <Footer className="mt-3 bg-white">
+    <Footer className="bg-white">
       <div className="max-w-[1200px] w-full mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Company Info Column */}

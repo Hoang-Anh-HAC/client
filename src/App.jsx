@@ -32,6 +32,8 @@ import Contact from "./pages/user/Contact";
 
 // Components
 import ScrollToTop from "./components/user/ScrollToTop";
+import BlogDetail from "./pages/user/blog/BlogDetail";
+import BlogList from "./pages/user/blog/BlogList";
 
 // Routes Configuration
 const userRoutes = [
@@ -40,6 +42,8 @@ const userRoutes = [
   { path: "product/:slug", element: <ProductDetail /> },
   { path: "about", element: <About /> },
   { path: "contact", element: <Contact /> },
+  { path: "blog", element: <BlogList /> },
+  { path: "blog/:slug", element: <BlogDetail /> },
 ];
 
 const adminRoutes = [

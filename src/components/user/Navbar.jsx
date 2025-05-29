@@ -420,6 +420,11 @@ const Navbar = () => {
           <Link to="/contact" className="py-1">
             Liên Hệ
           </Link>
+          <div className="border-l border-grey h-6" />
+
+          <Link to="/blog" className="py-1">
+            Tin Tức
+          </Link>
         </ul>
 
         {/* Mobile Drawer with MobileCategoryList */}

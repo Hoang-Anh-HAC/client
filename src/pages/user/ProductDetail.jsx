@@ -168,6 +168,16 @@ function ProductDetail() {
     { title: "Mr. Lành", phone: "0931054605", email: "lanhha@hac.com.vn" },
     { title: "Ms. Giàu", phone: "0703582508", email: "giaule@hac.com.vn" },
     { title: "Ms. Thảo", phone: "0938176262", email: "thaole@hac.com.vn" },
+    {
+      title: "Mr. Nhu",
+      phone: "0392856885",
+      email: "nhunguyen@hac.com.vn",
+    },
+    {
+      title: "Mr. Thành",
+      phone: "0392856885",
+      email: "nhunguyen@hac.com.vn",
+    },
   ];
   const SaleContactCT = [
     { title: "Mr. Trung", phone: "0908301313", email: "trungtran@hac.com.vn" },

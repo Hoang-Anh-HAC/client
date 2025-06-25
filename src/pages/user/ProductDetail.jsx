@@ -173,11 +173,6 @@ function ProductDetail() {
       phone: "0392856885",
       email: "nhunguyen@hac.com.vn",
     },
-    {
-      title: "Mr. Thành",
-      phone: "0392856885",
-      email: "nhunguyen@hac.com.vn",
-    },
   ];
   const SaleContactCT = [
     { title: "Mr. Trung", phone: "0908301313", email: "trungtran@hac.com.vn" },
